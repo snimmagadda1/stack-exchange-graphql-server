@@ -1,6 +1,9 @@
 ## go application
 FROM golang:1.15-alpine3.12
 EXPOSE 8080
+ENV SERVER test
+ENV UNAME testu
+ENV PASS testpass
 ## We create an /app directory within our
 ## image that will hold our application source
 ## files

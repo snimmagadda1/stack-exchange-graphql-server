@@ -5,6 +5,10 @@
 type Query {
     getUser(id: Int!): User
     getPost(id: Int!): Post
+    getPostHistory(id: Int!): PostHistory
+    getBadge(id: Int!): Badge
+    getComment(id: Int!): Comment
+    getVote(id: Int!): Vote
 }
 
 type User {

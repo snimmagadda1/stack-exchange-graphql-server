@@ -84,6 +84,11 @@ type PostHistory struct {
 	ContentLicense    *string    `json:"contentLicense" gorm:"type:VARCHAR(20);column:ContentLicense"`
 }
 
+// TableName overrides the table name
+func (PostHistory) TableName() string {
+	return "post_history"
+}
+
 // Vote models the graphql layer and entity
 type Vote struct {
 	ID           string     `json:"id" gorm:"primaryKey;type:int;column:Id"`

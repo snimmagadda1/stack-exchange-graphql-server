@@ -25,6 +25,34 @@ func (r *queryResolver) GetPost(ctx context.Context, id int) (*model.Post, error
 	return &post, nil
 }
 
+func (r *queryResolver) GetPostHistory(ctx context.Context, id int) (*model.PostHistory, error) {
+	var ph model.PostHistory
+	r.DB.First(&ph, id)
+
+	return &ph, nil
+}
+
+func (r *queryResolver) GetBadge(ctx context.Context, id int) (*model.Badge, error) {
+	var b model.Badge
+	r.DB.First(&b, id)
+
+	return &b, nil
+}
+
+func (r *queryResolver) GetComment(ctx context.Context, id int) (*model.Comment, error) {
+	var com model.Comment
+	r.DB.First(&com, id)
+
+	return &com, nil
+}
+
+func (r *queryResolver) GetVote(ctx context.Context, id int) (*model.Vote, error) {
+	var v model.Vote
+	r.DB.First(&v, id)
+
+	return &v, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 

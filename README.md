@@ -4,7 +4,7 @@
 
 > GraphQL implementation to expose stack overflow resources (Comments, Posts, Answers, Votes, etc) 
 
-[Stack Overflow](https://api.stackexchange.com/docs?tab=category#docs) doesn't have a GraphQL api so this exists...
+[Stack Overflow](https://api.stackexchange.com/docs?tab=category#docs) doesn't have a GraphQL api...
 
 ## Install
 
@@ -28,7 +28,7 @@ TODO
 
 👤 **Sai Nimmagadda**
 
-* Website: https://s11a.com
+* Website: s11a.com
 * Github: [@snimmagadda1](https://github.com/snimmagadda1)
 
 ## 🤝 Contributing

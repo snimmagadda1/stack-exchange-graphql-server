@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/snimmagadda1/graphql-api/graph/generated"
 	"github.com/snimmagadda1/graphql-api/graph/model"
@@ -64,11 +63,4 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 type mutationResolver struct{ *Resolver }

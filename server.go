@@ -23,7 +23,7 @@ var db *gorm.DB
 func initDB() {
 	var err error
 	cnx := os.Getenv("UNAME") + ":" + os.Getenv("PASS")
-	dataSourceName := cnx + "@tcp(" + os.Getenv("SERVER") + ":3306)/stacke"
+	dataSourceName := cnx + "@tcp(" + os.Getenv("SERVER") + ":3306)/stacke?parseTime=true"
 	db, err = gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
 
 	if err != nil {
@@ -31,6 +31,7 @@ func initDB() {
 		log.Panic("failed to connect database")
 	}
 
+	// db.AutoMigrate(&model.User{})
 }
 
 func main() {

@@ -3,8 +3,8 @@
 # https://gqlgen.com/getting-started/
 
 type Query {
-    users: [User!]
-    getUser(id: ID!): User
+    getUser(id: Int!): User
+    getPost(id: Int!): Post
 }
 
 type User {
@@ -24,6 +24,71 @@ type User {
     accountId: Int
     lastAccessedDate: Time
     profileImageUrl: String
+}
+
+type Post {
+    id: ID!
+    postType: Int
+    acceptedAnswerId: Int
+    parentId: Int
+    score: Int
+    viewCount: Int
+    body: String
+    creationDate: Time
+    ownerUserId: Int
+    lastEditorDisplayName: String
+    lastActivityDate: Time
+    closedDate: Time
+    title: String
+    tags: String
+    answerCount: Int
+    commentCount: Int
+    contentLicense: String
+}
+
+type PostHistory {
+    id: ID!
+    postHistoryTypeId: Int
+    postId: Int
+    revisionGUID: String
+    creationDate: Time
+    userId: Int
+    userDisplayName: String
+    comment: String
+    closeReasonTypes: Int
+    postNoticeId: Int
+    text: String
+    contentLicense: String
+}
+
+type Badge {
+    id: ID!
+    userId: Int
+    name: String
+    date: Time
+    class: Int
+    badgeClass: Int
+    TagBased: Int
+}
+
+type Comment {
+    id: ID!
+    postId: Int
+    score: Int
+    text: String
+    creationDate: Time
+    userDisplayName: String
+    userId: Int
+    contentLicense: String
+}
+
+type Vote {
+    id: ID!
+    postId: Int
+    voteTypeId: Int
+    userId: Int
+    creationDate: Time
+    bountyAmount: Int
 }
 
 scalar Time

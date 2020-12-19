@@ -11,12 +11,18 @@ import (
 	"github.com/snimmagadda1/graphql-api/graph/model"
 )
 
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetUser(ctx context.Context, id int) (*model.User, error) {
+	var user model.User
+	r.DB.First(&user, id)
+
+	return &user, nil
 }
 
-func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetPost(ctx context.Context, id int) (*model.Post, error) {
+	var post model.Post
+	r.DB.First(&post, id)
+
+	return &post, nil
 }
 
 // Query returns generated.QueryResolver implementation.
@@ -30,4 +36,11 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 type mutationResolver struct{ *Resolver }

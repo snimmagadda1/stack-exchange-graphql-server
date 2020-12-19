@@ -2,7 +2,10 @@ package graph
 
 //go:generate go run github.com/99designs/gqlgen
 
-import "github.com/snimmagadda1/graphql-api/graph/model"
+import (
+	"github.com/snimmagadda1/graphql-api/graph/model"
+	"gorm.io/gorm"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -10,4 +13,5 @@ import "github.com/snimmagadda1/graphql-api/graph/model"
 
 type Resolver struct {
 	users []*model.User
+	DB    *gorm.DB
 }

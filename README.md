@@ -57,7 +57,7 @@ TODO
 -   [gqlparser](https://github.com/vektah/gqlparser)
 -   [Azure](https://azure.microsoft.com/en-us/)
 -   [Excalidraw](https://github.com/excalidraw/excalidraw)
--   
+
 ### Current data pipeline
 Probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into a relational backend using a custom job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data.
 

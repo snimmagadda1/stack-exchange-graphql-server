@@ -63,6 +63,11 @@ type ComplexityRoot struct {
 		UserID          func(childComplexity int) int
 	}
 
+	PageInfo struct {
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+	}
+
 	Post struct {
 		AcceptedAnswerID      func(childComplexity int) int
 		AnswerCount           func(childComplexity int) int
@@ -83,6 +88,11 @@ type ComplexityRoot struct {
 		ViewCount             func(childComplexity int) int
 	}
 
+	PostEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	PostHistory struct {
 		CloseReasonTypes  func(childComplexity int) int
 		Comment           func(childComplexity int) int
@@ -98,7 +108,13 @@ type ComplexityRoot struct {
 		UserID            func(childComplexity int) int
 	}
 
+	PostsCursor struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
 	Query struct {
+		AllPostsCursor func(childComplexity int, first *int, after *string) int
 		GetBadge       func(childComplexity int, id int) int
 		GetComment     func(childComplexity int, id int) int
 		GetPost        func(childComplexity int, id int) int
@@ -143,6 +159,7 @@ type QueryResolver interface {
 	GetBadge(ctx context.Context, id int) (*model.Badge, error)
 	GetComment(ctx context.Context, id int) (*model.Comment, error)
 	GetVote(ctx context.Context, id int) (*model.Vote, error)
+	AllPostsCursor(ctx context.Context, first *int, after *string) (*model.PostsCursor, error)
 }
 
 type executableSchema struct {
@@ -265,6 +282,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.UserID(childComplexity), true
 
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "PageInfo.hasPreviousPage":
+		if e.complexity.PageInfo.HasPreviousPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+
 	case "Post.acceptedAnswerId":
 		if e.complexity.Post.AcceptedAnswerID == nil {
 			break
@@ -384,6 +415,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.ViewCount(childComplexity), true
 
+	case "PostEdge.cursor":
+		if e.complexity.PostEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.PostEdge.Cursor(childComplexity), true
+
+	case "PostEdge.node":
+		if e.complexity.PostEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.PostEdge.Node(childComplexity), true
+
 	case "PostHistory.closeReasonTypes":
 		if e.complexity.PostHistory.CloseReasonTypes == nil {
 			break
@@ -467,6 +512,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PostHistory.UserID(childComplexity), true
+
+	case "PostsCursor.edges":
+		if e.complexity.PostsCursor.Edges == nil {
+			break
+		}
+
+		return e.complexity.PostsCursor.Edges(childComplexity), true
+
+	case "PostsCursor.pageInfo":
+		if e.complexity.PostsCursor.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.PostsCursor.PageInfo(childComplexity), true
+
+	case "Query.allPostsCursor":
+		if e.complexity.Query.AllPostsCursor == nil {
+			break
+		}
+
+		args, err := ec.field_Query_allPostsCursor_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AllPostsCursor(childComplexity, args["first"].(*int), args["after"].(*string)), true
 
 	case "Query.getBadge":
 		if e.complexity.Query.GetBadge == nil {
@@ -755,6 +826,15 @@ type Query {
     getBadge(id: Int!): Badge
     getComment(id: Int!): Comment
     getVote(id: Int!): Vote
+
+    allPostsCursor(first: Int = 10, after: String): PostsCursor
+}
+
+type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    # startCursor: String
+    # endCursor: String
 }
 
 type User {
@@ -794,6 +874,16 @@ type Post {
     answerCount: Int
     commentCount: Int
     contentLicense: String
+}
+
+type PostEdge {
+    cursor: String!
+    node: Post!
+}
+
+type PostsCursor {
+    edges: [PostEdge]!
+    pageInfo: PageInfo
 }
 
 type PostHistory {
@@ -862,6 +952,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_allPostsCursor_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
 	return args, nil
 }
 
@@ -1479,6 +1593,76 @@ func (ec *executionContext) _Comment_contentLicense(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasPreviousPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Post_id(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2026,6 +2210,76 @@ func (ec *executionContext) _Post_contentLicense(ctx context.Context, field grap
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PostEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.PostEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PostEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PostEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.PostEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PostEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Post)
+	fc.Result = res
+	return ec.marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PostHistory_id(ctx context.Context, field graphql.CollectedField, obj *model.PostHistory) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2413,6 +2667,73 @@ func (ec *executionContext) _PostHistory_contentLicense(ctx context.Context, fie
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PostsCursor_edges(ctx context.Context, field graphql.CollectedField, obj *model.PostsCursor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PostsCursor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PostEdge)
+	fc.Result = res
+	return ec.marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PostsCursor_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.PostsCursor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PostsCursor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2645,6 +2966,45 @@ func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.Co
 	res := resTmp.(*model.Vote)
 	fc.Result = res
 	return ec.marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐVote(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_allPostsCursor_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AllPostsCursor(rctx, args["first"].(*int), args["after"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PostsCursor)
+	fc.Result = res
+	return ec.marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4603,6 +4963,38 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var pageInfoImplementors = []string{"PageInfo"}
+
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PageInfo")
+		case "hasPreviousPage":
+			out.Values[i] = ec._PageInfo_hasPreviousPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hasNextPage":
+			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var postImplementors = []string{"Post"}
 
 func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj *model.Post) graphql.Marshaler {
@@ -4662,6 +5054,38 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var postEdgeImplementors = []string{"PostEdge"}
+
+func (ec *executionContext) _PostEdge(ctx context.Context, sel ast.SelectionSet, obj *model.PostEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, postEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PostEdge")
+		case "cursor":
+			out.Values[i] = ec._PostEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+			out.Values[i] = ec._PostEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var postHistoryImplementors = []string{"PostHistory"}
 
 func (ec *executionContext) _PostHistory(ctx context.Context, sel ast.SelectionSet, obj *model.PostHistory) graphql.Marshaler {
@@ -4700,6 +5124,35 @@ func (ec *executionContext) _PostHistory(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._PostHistory_text(ctx, field, obj)
 		case "contentLicense":
 			out.Values[i] = ec._PostHistory_contentLicense(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var postsCursorImplementors = []string{"PostsCursor"}
+
+func (ec *executionContext) _PostsCursor(ctx context.Context, sel ast.SelectionSet, obj *model.PostsCursor) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, postsCursorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PostsCursor")
+		case "edges":
+			out.Values[i] = ec._PostsCursor_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._PostsCursor_pageInfo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4790,6 +5243,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getVote(ctx, field)
+				return res
+			})
+		case "allPostsCursor":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_allPostsCursor(ctx, field)
 				return res
 			})
 		case "__type":
@@ -5191,6 +5655,53 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Post(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx context.Context, sel ast.SelectionSet, v []*model.PostEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPostEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5488,6 +5999,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return graphql.MarshalInt(*v)
 }
 
+func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PageInfo(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -5495,11 +6013,25 @@ func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphq
 	return ec._Post(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPostEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx context.Context, sel ast.SelectionSet, v *model.PostEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PostEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOPostHistory2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostHistory(ctx context.Context, sel ast.SelectionSet, v *model.PostHistory) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PostHistory(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsCursor(ctx context.Context, sel ast.SelectionSet, v *model.PostsCursor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PostsCursor(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

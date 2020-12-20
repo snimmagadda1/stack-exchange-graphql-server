@@ -5,15 +5,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	gorilla "github.com/gorilla/handlers"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"github.com/snimmagadda1/graphql-api/graph"
 	"github.com/snimmagadda1/graphql-api/graph/generated"
+	_ "github.com/snimmagadda1/graphql-api/graph/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	gormlog "gorm.io/gorm/logger"
 )
 
 const defaultPort = "8080"
@@ -21,34 +26,44 @@ const defaultPort = "8080"
 var db *gorm.DB
 
 func initDB() {
+	logrus.Info("Initializing datasource ...")
 	var err error
 	cnx := os.Getenv("UNAME") + ":" + os.Getenv("PASS")
 	dataSourceName := cnx + "@tcp(" + os.Getenv("SERVER") + ":3306)/stacke?parseTime=true"
-	db, err = gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
+
+	db, err = gorm.Open(mysql.Open(dataSourceName), &gorm.Config{
+		Logger: gormlog.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold: time.Second, // Slow SQL threshold
+				LogLevel:      gormlog.Info,
+				Colorful:      true,
+			},
+		)})
 
 	if err != nil {
 		fmt.Println(err)
-		log.Panic("failed to connect database")
+		logrus.Fatal("Failed to connect database")
 	}
-
-	// db.AutoMigrate(&model.User{})
 }
 
 func main() {
+	logrus.Info("Loading environment")
 	godotenv.Load()
 	initDB()
 
 	port := os.Getenv("PORT")
 	if port == "" {
+		logrus.Debugf("using default port %s", defaultPort)
 		port = defaultPort
 	}
 
 	// srv type handler
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
-	logHandler := gorilla.LoggingHandler(os.Stdout, srv)
-	http.Handle("/", gorilla.LoggingHandler(os.Stdout, playground.Handler("GraphQL playground", "/query")))
+	logHandler := gorilla.LoggingHandler(logrus.StandardLogger().Out, srv)
+	http.Handle("/", gorilla.LoggingHandler(logrus.StandardLogger().Out, playground.Handler("GraphQL playground", "/query")))
 	http.Handle("/query", logHandler)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	logrus.Infof("connect to http://localhost:%s/ for GraphQL playground", port)
+	logrus.Fatal(http.ListenAndServe(":"+port, nil))
 }

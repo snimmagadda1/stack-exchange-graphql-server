@@ -9,6 +9,15 @@ type Query {
     getBadge(id: Int!): Badge
     getComment(id: Int!): Comment
     getVote(id: Int!): Vote
+
+    allPostsCursor(first: Int = 10, after: String): PostsCursor
+}
+
+type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    # startCursor: String
+    # endCursor: String
 }
 
 type User {
@@ -48,6 +57,16 @@ type Post {
     answerCount: Int
     commentCount: Int
     contentLicense: String
+}
+
+type PostEdge {
+    cursor: String!
+    node: Post!
+}
+
+type PostsCursor {
+    edges: [PostEdge]!
+    pageInfo: PageInfo
 }
 
 type PostHistory {

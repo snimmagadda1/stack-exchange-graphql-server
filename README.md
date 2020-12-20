@@ -73,7 +73,7 @@ I'm probably going to do some refinement and swap to something like an Elastic b
 
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome!
+This project is currently in build-mode. Contributions, issues and feature requests are welcome!
 
 Feel free to check [issues page](https://github.com/snimmagadda1/stack-exchange-graphql/issues).
 

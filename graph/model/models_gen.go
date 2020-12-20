@@ -2,6 +2,12 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type PageInfo struct {
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	HasNextPage     bool `json:"hasNextPage"`
@@ -15,4 +21,99 @@ type PostEdge struct {
 type PostsCursor struct {
 	Edges    []*PostEdge `json:"edges"`
 	PageInfo *PageInfo   `json:"pageInfo"`
+}
+
+type PostsOrderBy struct {
+	Field *PostsSortFields `json:"field"`
+	Order *Order           `json:"order"`
+}
+
+type PostsWhere struct {
+	Order *PostsOrderBy `json:"order"`
+}
+
+type Order string
+
+const (
+	OrderDesc Order = "DESC"
+	OrderAsc  Order = "ASC"
+)
+
+var AllOrder = []Order{
+	OrderDesc,
+	OrderAsc,
+}
+
+func (e Order) IsValid() bool {
+	switch e {
+	case OrderDesc, OrderAsc:
+		return true
+	}
+	return false
+}
+
+func (e Order) String() string {
+	return string(e)
+}
+
+func (e *Order) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Order(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Order", str)
+	}
+	return nil
+}
+
+func (e Order) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PostsSortFields string
+
+const (
+	PostsSortFieldsOpaqueKey PostsSortFields = "opaqueKey"
+	PostsSortFieldsActivity  PostsSortFields = "activity"
+	PostsSortFieldsCreation  PostsSortFields = "creation"
+	PostsSortFieldsVotes     PostsSortFields = "votes"
+)
+
+var AllPostsSortFields = []PostsSortFields{
+	PostsSortFieldsOpaqueKey,
+	PostsSortFieldsActivity,
+	PostsSortFieldsCreation,
+	PostsSortFieldsVotes,
+}
+
+func (e PostsSortFields) IsValid() bool {
+	switch e {
+	case PostsSortFieldsOpaqueKey, PostsSortFieldsActivity, PostsSortFieldsCreation, PostsSortFieldsVotes:
+		return true
+	}
+	return false
+}
+
+func (e PostsSortFields) String() string {
+	return string(e)
+}
+
+func (e *PostsSortFields) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PostsSortFields(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PostsSortFields", str)
+	}
+	return nil
+}
+
+func (e PostsSortFields) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

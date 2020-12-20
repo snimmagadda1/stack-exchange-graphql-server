@@ -10,7 +10,11 @@ type Query {
     getComment(id: Int!): Comment
     getVote(id: Int!): Vote
 
-    allPostsCursor(first: Int = 10, after: String): PostsCursor
+    allPostsCursor(
+        first: Int = 10
+        after: String
+        where: PostsWhere
+    ): PostsCursor
 }
 
 type PageInfo {
@@ -67,6 +71,27 @@ type PostEdge {
 type PostsCursor {
     edges: [PostEdge]!
     pageInfo: PageInfo
+}
+
+enum Order {
+    DESC
+    ASC
+}
+
+enum PostsSortFields {
+    opaqueKey
+    activity
+    creation
+    votes
+}
+
+input PostsOrderBy {
+    field: PostsSortFields
+    order: Order
+}
+
+input PostsWhere {
+    order: PostsOrderBy
 }
 
 type PostHistory {

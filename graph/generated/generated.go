@@ -114,7 +114,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AllPostsCursor func(childComplexity int, first *int, after *string) int
+		AllPostsCursor func(childComplexity int, first *int, after *string, where *model.PostsWhere) int
 		GetBadge       func(childComplexity int, id int) int
 		GetComment     func(childComplexity int, id int) int
 		GetPost        func(childComplexity int, id int) int
@@ -159,7 +159,7 @@ type QueryResolver interface {
 	GetBadge(ctx context.Context, id int) (*model.Badge, error)
 	GetComment(ctx context.Context, id int) (*model.Comment, error)
 	GetVote(ctx context.Context, id int) (*model.Vote, error)
-	AllPostsCursor(ctx context.Context, first *int, after *string) (*model.PostsCursor, error)
+	AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error)
 }
 
 type executableSchema struct {
@@ -537,7 +537,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.AllPostsCursor(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Query.AllPostsCursor(childComplexity, args["first"].(*int), args["after"].(*string), args["where"].(*model.PostsWhere)), true
 
 	case "Query.getBadge":
 		if e.complexity.Query.GetBadge == nil {
@@ -827,7 +827,11 @@ type Query {
     getComment(id: Int!): Comment
     getVote(id: Int!): Vote
 
-    allPostsCursor(first: Int = 10, after: String): PostsCursor
+    allPostsCursor(
+        first: Int = 10
+        after: String
+        where: PostsWhere
+    ): PostsCursor
 }
 
 type PageInfo {
@@ -884,6 +888,27 @@ type PostEdge {
 type PostsCursor {
     edges: [PostEdge]!
     pageInfo: PageInfo
+}
+
+enum Order {
+    DESC
+    ASC
+}
+
+enum PostsSortFields {
+    opaqueKey
+    activity
+    creation
+    votes
+}
+
+input PostsOrderBy {
+    field: PostsSortFields
+    order: Order
+}
+
+input PostsWhere {
+    order: PostsOrderBy
 }
 
 type PostHistory {
@@ -976,6 +1001,15 @@ func (ec *executionContext) field_Query_allPostsCursor_args(ctx context.Context,
 		}
 	}
 	args["after"] = arg1
+	var arg2 *model.PostsWhere
+	if tmp, ok := rawArgs["where"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+		arg2, err = ec.unmarshalOPostsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsWhere(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["where"] = arg2
 	return args, nil
 }
 
@@ -2993,7 +3027,7 @@ func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().AllPostsCursor(rctx, args["first"].(*int), args["after"].(*string))
+		return ec.resolvers.Query().AllPostsCursor(rctx, args["first"].(*int), args["after"].(*string), args["where"].(*model.PostsWhere))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4875,6 +4909,54 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputPostsOrderBy(ctx context.Context, obj interface{}) (model.PostsOrderBy, error) {
+	var it model.PostsOrderBy
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsSortFields(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐOrder(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPostsWhere(ctx context.Context, obj interface{}) (model.PostsWhere, error) {
+	var it model.PostsWhere
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsOrderBy(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -5999,6 +6081,22 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return graphql.MarshalInt(*v)
 }
 
+func (ec *executionContext) unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐOrder(ctx context.Context, v interface{}) (*model.Order, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.Order)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -6032,6 +6130,38 @@ func (ec *executionContext) marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1�
 		return graphql.Null
 	}
 	return ec._PostsCursor(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsOrderBy(ctx context.Context, v interface{}) (*model.PostsOrderBy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPostsOrderBy(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsSortFields(ctx context.Context, v interface{}) (*model.PostsSortFields, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.PostsSortFields)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsSortFields(ctx context.Context, sel ast.SelectionSet, v *model.PostsSortFields) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOPostsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsWhere(ctx context.Context, v interface{}) (*model.PostsWhere, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPostsWhere(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

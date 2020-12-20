@@ -55,9 +55,28 @@ func (r *queryResolver) GetVote(ctx context.Context, id int) (*model.Vote, error
 	return &v, nil
 }
 
-func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *string) (*model.PostsCursor, error) {
+func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error) {
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
+	}
+	// field to sort by
+	field := "Id"
+	var order *model.PostsOrderBy
+	if where != nil {
+		order = where.Order
+		switch key := *order.Field; key {
+		case model.PostsSortFieldsOpaqueKey:
+			field = "Id"
+		case model.PostsSortFieldsActivity:
+			field = "LastActivityDate"
+		case model.PostsSortFieldsCreation:
+			field = "CreationDate"
+		case model.PostsSortFieldsVotes:
+			field = "Score"
+		default:
+			field = "Id"
+		}
+
 	}
 
 	// query start
@@ -77,16 +96,15 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	if first != nil {
 		limit = *first
 	}
-	// select * from posts where id = after order by id DESC limit first + 1
-	// id of extra res used as cursor
+	// select * from posts where id = after order by id DESC limit first
 	posts := []model.Post{}
-	r.DB.Where("id > ?", start).Limit(limit).Find(&posts).Order("id desc")
+	r.DB.Where(field+" > ?", start).Limit(limit).Find(&posts).Order(field + " desc")
 
 	// create edges from results
 	postEdges := []*model.PostEdge{}
-	for _, post := range posts {
-		postEdges = append(postEdges,
-			&model.PostEdge{Cursor: post.ID, Node: &post})
+	for i := range posts {
+		toAdd := &model.PostEdge{Cursor: posts[i].ID, Node: &posts[i]}
+		postEdges = append(postEdges, toAdd)
 	}
 
 	// should limt = first here...?
@@ -105,4 +123,11 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
 type mutationResolver struct{ *Resolver }

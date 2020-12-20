@@ -60,9 +60,8 @@ func main() {
 
 	// srv type handler
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
-	logHandler := gorilla.LoggingHandler(logrus.StandardLogger().Out, srv)
 	http.Handle("/", gorilla.LoggingHandler(logrus.StandardLogger().Out, playground.Handler("GraphQL playground", "/query")))
-	http.Handle("/query", logHandler)
+	http.Handle("/query", srv)
 
 	logrus.Infof("connect to http://localhost:%s/ for GraphQL playground", port)
 	logrus.Fatal(http.ListenAndServe(":"+port, nil))

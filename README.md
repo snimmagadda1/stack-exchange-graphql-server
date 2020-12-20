@@ -9,6 +9,8 @@
 
 [Stack Exchange](https://api.stackexchange.com/docs?tab=category#docs) doesn't have a GraphQL endpoint so I made one. For now, the live API above is in POC mode only as the schema is built. It is currently serving content from [https://anime.stackexchange.com/](https://anime.stackexchange.com/) and is updated weekly with more to come as the [pipeline & infra](https://github.com/snimmagadda1/stackexchange-dump-to-mysql) are beefed up & built out.
 
+#### [🚀 CURRENT SCHEMA HERE 🚀](./graph/schema.graphqls)
+
 ## Compile
 
 ```sh
@@ -37,11 +39,9 @@ Some environment variables must be set to run locally
 | `UNAME`  | String | app DB username cred | appuser        |
 | `PASS`   | String | app DB password cred | supersecret123 |
 
-
-
 `SERVER` should be the hostname of a MySQL DB. In order to serve content, the GraphQL server expects a populated `stacke` [schema](https://github.com/snimmagadda1/stack-exchange-dump-to-mysql/blob/master/src/main/resources/schema-base.sql).
 
-TODO: configurable params... 
+TODO: configurable params...
 
 ## Run tests
 
@@ -59,7 +59,8 @@ TODO
 -   [Excalidraw](https://github.com/excalidraw/excalidraw)
 
 ### Current data pipeline
-I'm probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into a relational backend using a custom job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this gets some traction, availability will be increased. 
+
+I'm probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into a relational backend using a custom job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this gets some traction, availability will be increased.
 
 ![Diagram of current processing pipeline](pipeline_current.png)
 

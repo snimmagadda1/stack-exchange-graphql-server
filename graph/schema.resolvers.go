@@ -5,12 +5,14 @@ package graph
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"github.com/snimmagadda1/graphql-api/graph/generated"
 	"github.com/snimmagadda1/graphql-api/graph/model"
+	"github.com/snimmagadda1/graphql-api/graph/util"
 )
 
 func (r *queryResolver) GetUser(ctx context.Context, id int) (*model.User, error) {
@@ -65,8 +67,6 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	if where != nil {
 		order = where.Order
 		switch key := *order.Field; key {
-		case model.PostsSortFieldsOpaqueKey:
-			field = "Id"
 		case model.PostsSortFieldsActivity:
 			field = "LastActivityDate"
 		case model.PostsSortFieldsCreation:
@@ -76,17 +76,20 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 		default:
 			field = "Id"
 		}
-
+		logrus.Infof("Using field %s with order type %s", field, order.Field)
 	}
 
 	// query start
-	start := 0
+	start := int64(0)
 	if after != nil {
-		b, err := strconv.Atoi(*after)
+		decoded, err := base64.StdEncoding.DecodeString(*after)
 		if err != nil {
 			return nil, err
 		}
-		start = b // might need to be + 1
+		start, err = strconv.ParseInt(string(decoded), 10, 0)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var total int64
@@ -96,6 +99,10 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	if first != nil {
 		limit = *first
 	}
+	if limit > 100 {
+		logrus.Warn("Limit requested exceeds maximum 100")
+		limit = 100
+	}
 	// select * from posts where id = after order by id DESC limit first
 	posts := []model.Post{}
 	r.DB.Where(field+" > ?", start).Limit(limit).Find(&posts).Order(field + " desc")
@@ -103,13 +110,14 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	// create edges from results
 	postEdges := []*model.PostEdge{}
 	for i := range posts {
-		toAdd := &model.PostEdge{Cursor: posts[i].ID, Node: &posts[i]}
+		cursor := util.GetCursor(posts[i], field)
+		toAdd := &model.PostEdge{Cursor: cursor, Node: &posts[i]}
 		postEdges = append(postEdges, toAdd)
 	}
 
 	// should limt = first here...?
 	pageInfo := model.PageInfo{
-		HasNextPage:     int64(start+limit) < total,
+		HasNextPage:     start+int64(limit) < total,
 		HasPreviousPage: start > 0,
 	}
 

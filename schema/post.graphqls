@@ -14,7 +14,9 @@ type Post {
     title: String
     tags: String
     answerCount: Int
+    answers: [Post]!
     commentCount: Int
+    comments: [Comment]
     contentLicense: String
 }
 

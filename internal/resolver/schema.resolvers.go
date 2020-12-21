@@ -97,9 +97,9 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	if first != nil {
 		limit = *first
 	}
-	if limit > 100 {
-		logrus.Warn("Limit requested exceeds maximum 100")
-		limit = 100
+	if limit > 50 {
+		logrus.Warn("Limit requested exceeds maximum 50")
+		limit = 50
 	}
 
 	// result metadata

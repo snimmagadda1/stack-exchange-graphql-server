@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -35,6 +36,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Post() PostResolver
 	Query() QueryResolver
 }
 
@@ -81,9 +83,11 @@ type ComplexityRoot struct {
 	Post struct {
 		AcceptedAnswerID      func(childComplexity int) int
 		AnswerCount           func(childComplexity int) int
+		Answers               func(childComplexity int) int
 		Body                  func(childComplexity int) int
 		ClosedDate            func(childComplexity int) int
 		CommentCount          func(childComplexity int) int
+		Comments              func(childComplexity int) int
 		ContentLicense        func(childComplexity int) int
 		CreationDate          func(childComplexity int) int
 		ID                    func(childComplexity int) int
@@ -174,6 +178,11 @@ type ComplexityRoot struct {
 	}
 }
 
+type PostResolver interface {
+	Answers(ctx context.Context, obj *model.Post) ([]*model.Post, error)
+
+	Comments(ctx context.Context, obj *model.Post) ([]*model.Comment, error)
+}
 type QueryResolver interface {
 	GetUser(ctx context.Context, id int) (*model.User, error)
 	GetPost(ctx context.Context, id int) (*model.Post, error)
@@ -362,6 +371,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.AnswerCount(childComplexity), true
 
+	case "Post.answers":
+		if e.complexity.Post.Answers == nil {
+			break
+		}
+
+		return e.complexity.Post.Answers(childComplexity), true
+
 	case "Post.body":
 		if e.complexity.Post.Body == nil {
 			break
@@ -382,6 +398,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Post.CommentCount(childComplexity), true
+
+	case "Post.comments":
+		if e.complexity.Post.Comments == nil {
+			break
+		}
+
+		return e.complexity.Post.Comments(childComplexity), true
 
 	case "Post.contentLicense":
 		if e.complexity.Post.ContentLicense == nil {
@@ -956,7 +979,9 @@ type CommentsCursor {
     title: String
     tags: String
     answerCount: Int
+    answers: [Post]!
     commentCount: Int
+    comments: [Comment]
     contentLicense: String
 }
 
@@ -2487,6 +2512,41 @@ func (ec *executionContext) _Post_answerCount(ctx context.Context, field graphql
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Post_answers(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Post",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Post().Answers(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Post)
+	fc.Result = res
+	return ec.marshalNPost2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Post_commentCount(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2517,6 +2577,38 @@ func (ec *executionContext) _Post_commentCount(ctx context.Context, field graphq
 	res := resTmp.(*int)
 	fc.Result = res
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Post_comments(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Post",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Post().Comments(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Comment)
+	fc.Result = res
+	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Post_contentLicense(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
@@ -5674,7 +5766,7 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 			out.Values[i] = ec._Post_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "postType":
 			out.Values[i] = ec._Post_postType(ctx, field, obj)
@@ -5704,8 +5796,33 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Post_tags(ctx, field, obj)
 		case "answerCount":
 			out.Values[i] = ec._Post_answerCount(ctx, field, obj)
+		case "answers":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Post_answers(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "commentCount":
 			out.Values[i] = ec._Post_commentCount(ctx, field, obj)
+		case "comments":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Post_comments(ctx, field, obj)
+				return res
+			})
 		case "contentLicense":
 			out.Values[i] = ec._Post_contentLicense(ctx, field, obj)
 		default:
@@ -6450,6 +6567,43 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNPost2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6817,6 +6971,46 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v []*model.Comment) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {

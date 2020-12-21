@@ -21,7 +21,7 @@ import (
 	gormlog "gorm.io/gorm/logger"
 )
 
-const defaultPort = "8080"
+const defaultPort = "8081"
 
 var db *gorm.DB
 
@@ -29,7 +29,11 @@ func initDB() {
 	logrus.Info("Initializing datasource ...")
 	var err error
 	cnx := os.Getenv("UNAME") + ":" + os.Getenv("PASS")
-	dataSourceName := cnx + "@tcp(" + os.Getenv("SERVER") + ":3306)/stacke?parseTime=true"
+	schema, exist := os.LookupEnv("SCHEMA")
+	if !exist {
+		schema = "stacke"
+	}
+	dataSourceName := cnx + "@tcp(" + os.Getenv("SERVER") + ":3306)/" + schema + "?parseTime=true"
 
 	db, err = gorm.Open(mysql.Open(dataSourceName), &gorm.Config{
 		Logger: gormlog.New(

@@ -13,7 +13,15 @@
 
 ## Usage
 
-The server is available as a docker container:
+To run locally:
+
+```
+docker-compose up
+```
+
+and visit [http://localhost:8080](http://localhost:8080) to start using the playground or hit the endpoint with some queries!
+
+The server is also available as a docker container:
 
 ```
 docker run -e SERVER='<dbhost>' -e UNAME='<dbUname>' -e PASS='<dbPass>' snimmagadda/stack-exchange-graphql-server:latest
@@ -30,6 +38,7 @@ Some environment variables must be set to run locally
 | Key      | Type   | Description          | Example        |
 | -------- | ------ | -------------------- | -------------- |
 | `SERVER` | String | DB host              | localhost      |
+| `SCHEMA` | String | app DB schema        | stacke         |
 | `UNAME`  | String | app DB username cred | appuser        |
 | `PASS`   | String | app DB password cred | supersecret123 |
 
@@ -45,7 +54,20 @@ go build server.go
 
 ## Development
 
-TODO
+Options for development are readily flexible with more streamlined routes to come..
+
+1. Run the backend only (`DB` service) with `docker-compose`. This will also give you an optional interface to inspect the DB at `http://localhost:8080`. [~1K rows exist here](/dev/init/seed.sql) will be used as inserts to your schema.
+
+    ```
+    docker-compose up
+    ```
+
+2. Create (or copy) a .env file with the variables in the table above set to configure the server.
+3. Start the server:
+
+```
+go run server.go
+```
 
 ## Run tests
 
@@ -64,7 +86,7 @@ TODO
 
 ### Current data pipeline
 
-I'm probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into an indexed relational backend using a job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this gets some traction, availability will be increased.
+I'm probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into an indexed relational backend using a job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this happens, please be patient and the playground/requests should come blazing in after the first 'wakeup'. If this gets some traction, availability will be increased.
 
 ![Diagram of current processing pipeline](pipeline_current.png)
 

@@ -10,6 +10,8 @@ services:
             MYSQL_DATABASE: stacke
             MYSQL_USER: user
             MYSQL_PASSWORD: password
+        ports:
+            - 3306:3306
 
         volumes:
             - ./dev/init:/docker-entrypoint-initdb.d
@@ -24,11 +26,13 @@ services:
             PASS: password
             SCHEMA: stacke
             SERVER: db
-
-    adminer:
-        image: adminer
-        restart: always
-        depends_on:
-            - db
         ports:
             - 8080:8080
+
+    # adminer:
+    #     image: adminer
+    #     restart: always
+    #     depends_on:
+    #         - db
+    #     ports:
+    #         - 8080:8080

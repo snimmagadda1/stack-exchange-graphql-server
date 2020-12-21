@@ -21,7 +21,7 @@ docker-compose up
 
 and visit [http://localhost:8080](http://localhost:8080) to start using the playground or hit the endpoint with some queries!
 
-The server is also available as a docker container:
+The server is also available as a docker container provided a separate backend exists:
 
 ```
 docker run -e SERVER='<dbhost>' -e UNAME='<dbUname>' -e PASS='<dbPass>' snimmagadda/stack-exchange-graphql-server:latest
@@ -56,14 +56,14 @@ go build server.go
 
 Options for development are readily flexible with more streamlined routes to come..
 
-1. Run the backend only (`DB` service) with `docker-compose`. This will also give you an optional interface to inspect the DB at `http://localhost:8080`. [~1K rows exist here](/dev/init/seed.sql) will be used as inserts to your schema.
-
+1. Run the backend only with docker (or tweak & use `docker-compose.yml`)
     ```
-    docker-compose up
+    docker run --name test-mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_ROOT_USER=root -e MYSQL_PASSWORD=password -d -p 3306:3306 mysql:5.7.26
     ```
+2. [~1K rows exist here](/dev/init/seed.sql) will be used as inserts to your schema.
 
-2. Create (or copy) a .env file with the variables in the table above set to configure the server.
-3. Start the server:
+3. Create (or copy) a .env file with the variables in the table above set to configure the local GraphQL server.
+4. Start the server:
 
 ```
 go run server.go

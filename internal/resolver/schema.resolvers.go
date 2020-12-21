@@ -10,9 +10,9 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"github.com/snimmagadda1/graphql-api/graph/generated"
-	"github.com/snimmagadda1/graphql-api/graph/model"
-	"github.com/snimmagadda1/graphql-api/graph/util"
+	"github.com/snimmagadda1/graphql-api/generated"
+	"github.com/snimmagadda1/graphql-api/internal/util"
+	"github.com/snimmagadda1/graphql-api/model"
 )
 
 func (r *queryResolver) GetUser(ctx context.Context, id int) (*model.User, error) {

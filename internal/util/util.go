@@ -4,7 +4,7 @@ import (
 	b64 "encoding/base64"
 	"strconv"
 
-	"github.com/snimmagadda1/graphql-api/graph/model"
+	"github.com/snimmagadda1/graphql-api/model"
 )
 
 // GetCursor gets the specified cursor

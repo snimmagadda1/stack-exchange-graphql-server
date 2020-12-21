@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/snimmagadda1/graphql-api/graph/model"
+	"github.com/snimmagadda1/graphql-api/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -919,7 +919,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/comment.graphqls", Input: `type Comment {
+	{Name: "schema/comment.graphqls", Input: `type Comment {
     id: ID!
     postId: Int
     score: Int
@@ -940,7 +940,7 @@ type CommentsCursor {
     pageInfo: PageInfo
 }
 `, BuiltIn: false},
-	{Name: "graph/post.graphqls", Input: `type Post {
+	{Name: "schema/post.graphqls", Input: `type Post {
     id: ID!
     postType: Int
     acceptedAnswerId: Int
@@ -979,7 +979,7 @@ input PostsWhere {
     order: PostsOrderBy
 }
 `, BuiltIn: false},
-	{Name: "graph/schema.graphqls", Input: `type Query {
+	{Name: "schema/schema.graphqls", Input: `type Query {
     getUser(id: Int!): User
     getPost(id: Int!): Post
     getPostHistory(id: Int!): PostHistory
@@ -1051,7 +1051,7 @@ type Vote {
 
 scalar Time
 `, BuiltIn: false},
-	{Name: "graph/user.graphqls", Input: `type User {
+	{Name: "schema/user.graphqls", Input: `type User {
     id: ID!
     reputation: String
     creationDate: Time
@@ -1150,7 +1150,7 @@ func (ec *executionContext) field_Query_allPostsCursor_args(ctx context.Context,
 	var arg2 *model.PostsWhere
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg2, err = ec.unmarshalOPostsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsWhere(ctx, tmp)
+		arg2, err = ec.unmarshalOPostsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsWhere(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1864,7 +1864,7 @@ func (ec *executionContext) _CommentEdge_node(ctx context.Context, field graphql
 	}
 	res := resTmp.(*model.Comment)
 	fc.Result = res
-	return ec.marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+	return ec.marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CommentsCursor_edges(ctx context.Context, field graphql.CollectedField, obj *model.CommentsCursor) (ret graphql.Marshaler) {
@@ -1899,7 +1899,7 @@ func (ec *executionContext) _CommentsCursor_edges(ctx context.Context, field gra
 	}
 	res := resTmp.([]*model.CommentEdge)
 	fc.Result = res
-	return ec.marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx, field.Selections, res)
+	return ec.marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CommentsCursor_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CommentsCursor) (ret graphql.Marshaler) {
@@ -1931,7 +1931,7 @@ func (ec *executionContext) _CommentsCursor_pageInfo(ctx context.Context, field 
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
@@ -2618,7 +2618,7 @@ func (ec *executionContext) _PostEdge_node(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Post)
 	fc.Result = res
-	return ec.marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
+	return ec.marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PostHistory_id(ctx context.Context, field graphql.CollectedField, obj *model.PostHistory) (ret graphql.Marshaler) {
@@ -3040,7 +3040,7 @@ func (ec *executionContext) _PostsCursor_edges(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.PostEdge)
 	fc.Result = res
-	return ec.marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx, field.Selections, res)
+	return ec.marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PostsCursor_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.PostsCursor) (ret graphql.Marshaler) {
@@ -3072,7 +3072,7 @@ func (ec *executionContext) _PostsCursor_pageInfo(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3111,7 +3111,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3150,7 +3150,7 @@ func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Post)
 	fc.Result = res
-	return ec.marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
+	return ec.marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getPostHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3189,7 +3189,7 @@ func (ec *executionContext) _Query_getPostHistory(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.PostHistory)
 	fc.Result = res
-	return ec.marshalOPostHistory2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostHistory(ctx, field.Selections, res)
+	return ec.marshalOPostHistory2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostHistory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getBadge(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3228,7 +3228,7 @@ func (ec *executionContext) _Query_getBadge(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.Badge)
 	fc.Result = res
-	return ec.marshalOBadge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐBadge(ctx, field.Selections, res)
+	return ec.marshalOBadge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐBadge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3267,7 +3267,7 @@ func (ec *executionContext) _Query_getComment(ctx context.Context, field graphql
 	}
 	res := resTmp.(*model.Comment)
 	fc.Result = res
-	return ec.marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+	return ec.marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3306,7 +3306,7 @@ func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Vote)
 	fc.Result = res
-	return ec.marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐVote(ctx, field.Selections, res)
+	return ec.marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐVote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3345,7 +3345,7 @@ func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.PostsCursor)
 	fc.Result = res
-	return ec.marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsCursor(ctx, field.Selections, res)
+	return ec.marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3384,7 +3384,7 @@ func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field 
 	}
 	res := resTmp.(*model.CommentsCursor)
 	fc.Result = res
-	return ec.marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentsCursor(ctx, field.Selections, res)
+	return ec.marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allUsersCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3423,7 +3423,7 @@ func (ec *executionContext) _Query_allUsersCursor(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.UsersCursor)
 	fc.Result = res
-	return ec.marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUsersCursor(ctx, field.Selections, res)
+	return ec.marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4079,7 +4079,7 @@ func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UsersCursor_edges(ctx context.Context, field graphql.CollectedField, obj *model.UsersCursor) (ret graphql.Marshaler) {
@@ -4114,7 +4114,7 @@ func (ec *executionContext) _UsersCursor_edges(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.UserEdge)
 	fc.Result = res
-	return ec.marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx, field.Selections, res)
+	return ec.marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUserEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UsersCursor_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UsersCursor) (ret graphql.Marshaler) {
@@ -4146,7 +4146,7 @@ func (ec *executionContext) _UsersCursor_pageInfo(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Vote_id(ctx context.Context, field graphql.CollectedField, obj *model.Vote) (ret graphql.Marshaler) {
@@ -5441,7 +5441,7 @@ func (ec *executionContext) unmarshalInputPostsOrderBy(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			it.Field, err = ec.unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsSortFields(ctx, v)
+			it.Field, err = ec.unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsSortFields(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5449,7 +5449,7 @@ func (ec *executionContext) unmarshalInputPostsOrderBy(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
-			it.Order, err = ec.unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐOrder(ctx, v)
+			it.Order, err = ec.unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐOrder(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5469,7 +5469,7 @@ func (ec *executionContext) unmarshalInputPostsWhere(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
-			it.Order, err = ec.unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsOrderBy(ctx, v)
+			it.Order, err = ec.unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsOrderBy(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6373,7 +6373,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
+func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6383,7 +6383,7 @@ func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgra
 	return ec._Comment(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v []*model.CommentEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v []*model.CommentEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6407,7 +6407,7 @@ func (ec *executionContext) marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6450,7 +6450,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6460,7 +6460,7 @@ func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphq
 	return ec._Post(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx context.Context, sel ast.SelectionSet, v []*model.PostEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostEdge(ctx context.Context, sel ast.SelectionSet, v []*model.PostEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6484,7 +6484,7 @@ func (ec *executionContext) marshalNPostEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOPostEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOPostEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6512,7 +6512,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6522,7 +6522,7 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphq
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v []*model.UserEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v []*model.UserEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6546,7 +6546,7 @@ func (ec *executionContext) marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUserEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOUserEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUserEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6788,7 +6788,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOBadge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐBadge(ctx context.Context, sel ast.SelectionSet, v *model.Badge) graphql.Marshaler {
+func (ec *executionContext) marshalOBadge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐBadge(ctx context.Context, sel ast.SelectionSet, v *model.Badge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6819,21 +6819,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
+func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Comment(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v *model.CommentEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v *model.CommentEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._CommentEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentsCursor(ctx context.Context, sel ast.SelectionSet, v *model.CommentsCursor) graphql.Marshaler {
+func (ec *executionContext) marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsCursor(ctx context.Context, sel ast.SelectionSet, v *model.CommentsCursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6855,7 +6855,7 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return graphql.MarshalInt(*v)
 }
 
-func (ec *executionContext) unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐOrder(ctx context.Context, v interface{}) (*model.Order, error) {
+func (ec *executionContext) unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐOrder(ctx context.Context, v interface{}) (*model.Order, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6864,49 +6864,49 @@ func (ec *executionContext) unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgra
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {
+func (ec *executionContext) marshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Post(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPostEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostEdge(ctx context.Context, sel ast.SelectionSet, v *model.PostEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOPostEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostEdge(ctx context.Context, sel ast.SelectionSet, v *model.PostEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PostEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPostHistory2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostHistory(ctx context.Context, sel ast.SelectionSet, v *model.PostHistory) graphql.Marshaler {
+func (ec *executionContext) marshalOPostHistory2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostHistory(ctx context.Context, sel ast.SelectionSet, v *model.PostHistory) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PostHistory(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsCursor(ctx context.Context, sel ast.SelectionSet, v *model.PostsCursor) graphql.Marshaler {
+func (ec *executionContext) marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsCursor(ctx context.Context, sel ast.SelectionSet, v *model.PostsCursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PostsCursor(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsOrderBy(ctx context.Context, v interface{}) (*model.PostsOrderBy, error) {
+func (ec *executionContext) unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsOrderBy(ctx context.Context, v interface{}) (*model.PostsOrderBy, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6914,7 +6914,7 @@ func (ec *executionContext) unmarshalOPostsOrderBy2ᚖgithubᚗcomᚋsnimmagadda
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsSortFields(ctx context.Context, v interface{}) (*model.PostsSortFields, error) {
+func (ec *executionContext) unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsSortFields(ctx context.Context, v interface{}) (*model.PostsSortFields, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6923,14 +6923,14 @@ func (ec *executionContext) unmarshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmaga
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsSortFields(ctx context.Context, sel ast.SelectionSet, v *model.PostsSortFields) graphql.Marshaler {
+func (ec *executionContext) marshalOPostsSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsSortFields(ctx context.Context, sel ast.SelectionSet, v *model.PostsSortFields) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) unmarshalOPostsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsWhere(ctx context.Context, v interface{}) (*model.PostsWhere, error) {
+func (ec *executionContext) unmarshalOPostsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsWhere(ctx context.Context, v interface{}) (*model.PostsWhere, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6977,28 +6977,28 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return graphql.MarshalTime(*v)
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOUserEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._UserEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUsersCursor(ctx context.Context, sel ast.SelectionSet, v *model.UsersCursor) graphql.Marshaler {
+func (ec *executionContext) marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersCursor(ctx context.Context, sel ast.SelectionSet, v *model.UsersCursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._UsersCursor(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐVote(ctx context.Context, sel ast.SelectionSet, v *model.Vote) graphql.Marshaler {
+func (ec *executionContext) marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐVote(ctx context.Context, sel ast.SelectionSet, v *model.Vote) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

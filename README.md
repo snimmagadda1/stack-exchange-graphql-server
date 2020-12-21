@@ -54,7 +54,7 @@ go build cmd/server.go
 
 ## Development
 
-Options for development are readily flexible with more streamlined routes to come..
+Options for development are readily flexible with more streamlined routes to come... For now the following is available:
 
 1. Run the backend only with docker (or tweak & use `docker-compose.yml`)
     ```

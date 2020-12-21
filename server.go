@@ -21,7 +21,7 @@ import (
 	gormlog "gorm.io/gorm/logger"
 )
 
-const defaultPort = "8081"
+const defaultPort = "8080"
 
 var db *gorm.DB
 

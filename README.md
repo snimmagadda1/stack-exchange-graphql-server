@@ -60,7 +60,7 @@ Options for development are readily flexible with more streamlined routes to com
     ```
     docker run --name test-mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_ROOT_USER=root -e MYSQL_PASSWORD=password -d -p 3306:3306 mysql:5.7.26
     ```
-2. [~1K rows exist here](/dev/init/seed.sql) will be used as inserts to your schema.
+2. [~1K rows exist here](/dev/seed.sql) will be used as inserts to your schema.
 
 3. Create (or copy) a .env file with the variables in the table above set to configure the local GraphQL server.
 4. Start the server:

@@ -8,6 +8,16 @@ import (
 	"strconv"
 )
 
+type CommentEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *Comment `json:"node"`
+}
+
+type CommentsCursor struct {
+	Edges    []*CommentEdge `json:"edges"`
+	PageInfo *PageInfo      `json:"pageInfo"`
+}
+
 type PageInfo struct {
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	HasNextPage     bool `json:"hasNextPage"`
@@ -30,6 +40,16 @@ type PostsOrderBy struct {
 
 type PostsWhere struct {
 	Order *PostsOrderBy `json:"order"`
+}
+
+type UserEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *User  `json:"node"`
+}
+
+type UsersCursor struct {
+	Edges    []*UserEdge `json:"edges"`
+	PageInfo *PageInfo   `json:"pageInfo"`
 }
 
 type Order string

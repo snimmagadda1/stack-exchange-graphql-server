@@ -1,0 +1,38 @@
+type Post {
+    id: ID!
+    postType: Int
+    acceptedAnswerId: Int
+    parentId: Int
+    score: Int
+    viewCount: Int
+    body: String
+    creationDate: Time
+    ownerUserId: Int
+    lastEditorDisplayName: String
+    lastActivityDate: Time
+    closedDate: Time
+    title: String
+    tags: String
+    answerCount: Int
+    commentCount: Int
+    contentLicense: String
+}
+
+type PostEdge {
+    cursor: String!
+    node: Post!
+}
+
+type PostsCursor {
+    edges: [PostEdge]!
+    pageInfo: PageInfo
+}
+
+input PostsOrderBy {
+    field: PostsSortFields
+    order: Order
+}
+
+input PostsWhere {
+    order: PostsOrderBy
+}

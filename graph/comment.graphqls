@@ -1,0 +1,20 @@
+type Comment {
+    id: ID!
+    postId: Int
+    score: Int
+    text: String
+    creationDate: Time
+    userDisplayName: String
+    userId: Int
+    contentLicense: String
+}
+
+type CommentEdge {
+    cursor: String!
+    node: Comment!
+}
+
+type CommentsCursor {
+    edges: [CommentEdge]!
+    pageInfo: PageInfo
+}

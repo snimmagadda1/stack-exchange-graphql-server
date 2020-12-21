@@ -1,0 +1,28 @@
+type User {
+    id: ID!
+    reputation: String
+    creationDate: Time
+    displayName: String
+    lastAccessDate: Time
+    views: Int
+    websiteUrl: String
+    location: String
+    aboutMe: String
+    age: Int
+    upVotes: Int
+    downVotes: Int
+    emailHash: String
+    accountId: Int
+    lastAccessedDate: Time
+    profileImageUrl: String
+}
+
+type UserEdge {
+    cursor: String!
+    node: User!
+}
+
+type UsersCursor {
+    edges: [UserEdge]!
+    pageInfo: PageInfo
+}

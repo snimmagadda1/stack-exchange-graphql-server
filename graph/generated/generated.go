@@ -63,6 +63,16 @@ type ComplexityRoot struct {
 		UserID          func(childComplexity int) int
 	}
 
+	CommentEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	CommentsCursor struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
 	PageInfo struct {
 		HasNextPage     func(childComplexity int) int
 		HasPreviousPage func(childComplexity int) int
@@ -114,13 +124,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AllPostsCursor func(childComplexity int, first *int, after *string, where *model.PostsWhere) int
-		GetBadge       func(childComplexity int, id int) int
-		GetComment     func(childComplexity int, id int) int
-		GetPost        func(childComplexity int, id int) int
-		GetPostHistory func(childComplexity int, id int) int
-		GetUser        func(childComplexity int, id int) int
-		GetVote        func(childComplexity int, id int) int
+		AllCommentsCursor func(childComplexity int, first *int, after *string) int
+		AllPostsCursor    func(childComplexity int, first *int, after *string, where *model.PostsWhere) int
+		AllUsersCursor    func(childComplexity int, first *int, after *string) int
+		GetBadge          func(childComplexity int, id int) int
+		GetComment        func(childComplexity int, id int) int
+		GetPost           func(childComplexity int, id int) int
+		GetPostHistory    func(childComplexity int, id int) int
+		GetUser           func(childComplexity int, id int) int
+		GetVote           func(childComplexity int, id int) int
 	}
 
 	User struct {
@@ -142,6 +154,16 @@ type ComplexityRoot struct {
 		WebsiteURL       func(childComplexity int) int
 	}
 
+	UserEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	UsersCursor struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
 	Vote struct {
 		BountyAmount func(childComplexity int) int
 		CreationDate func(childComplexity int) int
@@ -160,6 +182,8 @@ type QueryResolver interface {
 	GetComment(ctx context.Context, id int) (*model.Comment, error)
 	GetVote(ctx context.Context, id int) (*model.Vote, error)
 	AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error)
+	AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error)
+	AllUsersCursor(ctx context.Context, first *int, after *string) (*model.UsersCursor, error)
 }
 
 type executableSchema struct {
@@ -281,6 +305,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.UserID(childComplexity), true
+
+	case "CommentEdge.cursor":
+		if e.complexity.CommentEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.CommentEdge.Cursor(childComplexity), true
+
+	case "CommentEdge.node":
+		if e.complexity.CommentEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.CommentEdge.Node(childComplexity), true
+
+	case "CommentsCursor.edges":
+		if e.complexity.CommentsCursor.Edges == nil {
+			break
+		}
+
+		return e.complexity.CommentsCursor.Edges(childComplexity), true
+
+	case "CommentsCursor.pageInfo":
+		if e.complexity.CommentsCursor.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CommentsCursor.PageInfo(childComplexity), true
 
 	case "PageInfo.hasNextPage":
 		if e.complexity.PageInfo.HasNextPage == nil {
@@ -527,6 +579,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PostsCursor.PageInfo(childComplexity), true
 
+	case "Query.allCommentsCursor":
+		if e.complexity.Query.AllCommentsCursor == nil {
+			break
+		}
+
+		args, err := ec.field_Query_allCommentsCursor_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AllCommentsCursor(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
 	case "Query.allPostsCursor":
 		if e.complexity.Query.AllPostsCursor == nil {
 			break
@@ -538,6 +602,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.AllPostsCursor(childComplexity, args["first"].(*int), args["after"].(*string), args["where"].(*model.PostsWhere)), true
+
+	case "Query.allUsersCursor":
+		if e.complexity.Query.AllUsersCursor == nil {
+			break
+		}
+
+		args, err := ec.field_Query_allUsersCursor_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AllUsersCursor(childComplexity, args["first"].(*int), args["after"].(*string)), true
 
 	case "Query.getBadge":
 		if e.complexity.Query.GetBadge == nil {
@@ -723,6 +799,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.WebsiteURL(childComplexity), true
 
+	case "UserEdge.cursor":
+		if e.complexity.UserEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.UserEdge.Cursor(childComplexity), true
+
+	case "UserEdge.node":
+		if e.complexity.UserEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.UserEdge.Node(childComplexity), true
+
+	case "UsersCursor.edges":
+		if e.complexity.UsersCursor.Edges == nil {
+			break
+		}
+
+		return e.complexity.UsersCursor.Edges(childComplexity), true
+
+	case "UsersCursor.pageInfo":
+		if e.complexity.UsersCursor.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.UsersCursor.PageInfo(childComplexity), true
+
 	case "Vote.bountyAmount":
 		if e.complexity.Vote.BountyAmount == nil {
 			break
@@ -815,48 +919,28 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type Query {
-    getUser(id: Int!): User
-    getPost(id: Int!): Post
-    getPostHistory(id: Int!): PostHistory
-    getBadge(id: Int!): Badge
-    getComment(id: Int!): Comment
-    getVote(id: Int!): Vote
-
-    allPostsCursor(
-        first: Int = 10
-        after: String
-        where: PostsWhere
-    ): PostsCursor
-}
-
-type PageInfo {
-    hasPreviousPage: Boolean!
-    hasNextPage: Boolean!
-    # startCursor: String
-    # endCursor: String
-}
-
-type User {
+	{Name: "graph/comment.graphqls", Input: `type Comment {
     id: ID!
-    reputation: String
+    postId: Int
+    score: Int
+    text: String
     creationDate: Time
-    displayName: String
-    lastAccessDate: Time
-    views: Int
-    websiteUrl: String
-    location: String
-    aboutMe: String
-    age: Int
-    upVotes: Int
-    downVotes: Int
-    emailHash: String
-    accountId: Int
-    lastAccessedDate: Time
-    profileImageUrl: String
+    userDisplayName: String
+    userId: Int
+    contentLicense: String
 }
 
-type Post {
+type CommentEdge {
+    cursor: String!
+    node: Comment!
+}
+
+type CommentsCursor {
+    edges: [CommentEdge]!
+    pageInfo: PageInfo
+}
+`, BuiltIn: false},
+	{Name: "graph/post.graphqls", Input: `type Post {
     id: ID!
     postType: Int
     acceptedAnswerId: Int
@@ -886,6 +970,39 @@ type PostsCursor {
     pageInfo: PageInfo
 }
 
+input PostsOrderBy {
+    field: PostsSortFields
+    order: Order
+}
+
+input PostsWhere {
+    order: PostsOrderBy
+}
+`, BuiltIn: false},
+	{Name: "graph/schema.graphqls", Input: `type Query {
+    getUser(id: Int!): User
+    getPost(id: Int!): Post
+    getPostHistory(id: Int!): PostHistory
+    getBadge(id: Int!): Badge
+    getComment(id: Int!): Comment
+    getVote(id: Int!): Vote
+
+    allPostsCursor(
+        first: Int = 10
+        after: String
+        where: PostsWhere
+    ): PostsCursor
+    allCommentsCursor(first: Int = 10, after: String): CommentsCursor
+    allUsersCursor(first: Int = 10, after: String): UsersCursor
+}
+
+type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    # startCursor: String
+    # endCursor: String
+}
+
 enum Order {
     DESC
     ASC
@@ -896,15 +1013,6 @@ enum PostsSortFields {
     activity
     creation
     votes
-}
-
-input PostsOrderBy {
-    field: PostsSortFields
-    order: Order
-}
-
-input PostsWhere {
-    order: PostsOrderBy
 }
 
 type PostHistory {
@@ -932,17 +1040,6 @@ type Badge {
     TagBased: Int
 }
 
-type Comment {
-    id: ID!
-    postId: Int
-    score: Int
-    text: String
-    creationDate: Time
-    userDisplayName: String
-    userId: Int
-    contentLicense: String
-}
-
 type Vote {
     id: ID!
     postId: Int
@@ -953,6 +1050,35 @@ type Vote {
 }
 
 scalar Time
+`, BuiltIn: false},
+	{Name: "graph/user.graphqls", Input: `type User {
+    id: ID!
+    reputation: String
+    creationDate: Time
+    displayName: String
+    lastAccessDate: Time
+    views: Int
+    websiteUrl: String
+    location: String
+    aboutMe: String
+    age: Int
+    upVotes: Int
+    downVotes: Int
+    emailHash: String
+    accountId: Int
+    lastAccessedDate: Time
+    profileImageUrl: String
+}
+
+type UserEdge {
+    cursor: String!
+    node: User!
+}
+
+type UsersCursor {
+    edges: [UserEdge]!
+    pageInfo: PageInfo
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -973,6 +1099,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_allCommentsCursor_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
 	return args, nil
 }
 
@@ -1006,6 +1156,30 @@ func (ec *executionContext) field_Query_allPostsCursor_args(ctx context.Context,
 		}
 	}
 	args["where"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_allUsersCursor_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
 	return args, nil
 }
 
@@ -1621,6 +1795,143 @@ func (ec *executionContext) _Comment_contentLicense(ctx context.Context, field g
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CommentEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.CommentEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CommentEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CommentEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.CommentEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CommentEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CommentsCursor_edges(ctx context.Context, field graphql.CollectedField, obj *model.CommentsCursor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CommentsCursor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CommentEdge)
+	fc.Result = res
+	return ec.marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CommentsCursor_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CommentsCursor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CommentsCursor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
@@ -3037,6 +3348,84 @@ func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field gra
 	return ec.marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPostsCursor(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_allCommentsCursor_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AllCommentsCursor(rctx, args["first"].(*int), args["after"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CommentsCursor)
+	fc.Result = res
+	return ec.marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentsCursor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_allUsersCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_allUsersCursor_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AllUsersCursor(rctx, args["first"].(*int), args["after"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UsersCursor)
+	fc.Result = res
+	return ec.marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUsersCursor(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3621,6 +4010,143 @@ func (ec *executionContext) _User_profileImageUrl(ctx context.Context, field gra
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.UserEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UserEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.UserEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UserEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UsersCursor_edges(ctx context.Context, field graphql.CollectedField, obj *model.UsersCursor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UsersCursor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UserEdge)
+	fc.Result = res
+	return ec.marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UsersCursor_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UsersCursor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UsersCursor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Vote_id(ctx context.Context, field graphql.CollectedField, obj *model.Vote) (ret graphql.Marshaler) {
@@ -5041,6 +5567,67 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var commentEdgeImplementors = []string{"CommentEdge"}
+
+func (ec *executionContext) _CommentEdge(ctx context.Context, sel ast.SelectionSet, obj *model.CommentEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, commentEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CommentEdge")
+		case "cursor":
+			out.Values[i] = ec._CommentEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+			out.Values[i] = ec._CommentEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var commentsCursorImplementors = []string{"CommentsCursor"}
+
+func (ec *executionContext) _CommentsCursor(ctx context.Context, sel ast.SelectionSet, obj *model.CommentsCursor) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, commentsCursorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CommentsCursor")
+		case "edges":
+			out.Values[i] = ec._CommentsCursor_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._CommentsCursor_pageInfo(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var pageInfoImplementors = []string{"PageInfo"}
 
 func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
@@ -5334,6 +5921,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_allPostsCursor(ctx, field)
 				return res
 			})
+		case "allCommentsCursor":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_allCommentsCursor(ctx, field)
+				return res
+			})
+		case "allUsersCursor":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_allUsersCursor(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -5395,6 +6004,67 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_lastAccessedDate(ctx, field, obj)
 		case "profileImageUrl":
 			out.Values[i] = ec._User_profileImageUrl(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userEdgeImplementors = []string{"UserEdge"}
+
+func (ec *executionContext) _UserEdge(ctx context.Context, sel ast.SelectionSet, obj *model.UserEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserEdge")
+		case "cursor":
+			out.Values[i] = ec._UserEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+			out.Values[i] = ec._UserEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var usersCursorImplementors = []string{"UsersCursor"}
+
+func (ec *executionContext) _UsersCursor(ctx context.Context, sel ast.SelectionSet, obj *model.UsersCursor) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, usersCursorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UsersCursor")
+		case "edges":
+			out.Values[i] = ec._UsersCursor_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._UsersCursor_pageInfo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5703,6 +6373,53 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Comment(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCommentEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v []*model.CommentEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5793,6 +6510,53 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUserEdge2ᚕᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v []*model.UserEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOUserEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -6062,6 +6826,20 @@ func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgra
 	return ec._Comment(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v *model.CommentEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CommentEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐCommentsCursor(ctx context.Context, sel ast.SelectionSet, v *model.CommentsCursor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CommentsCursor(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -6204,6 +6982,20 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphq
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUserEdge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UserEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐUsersCursor(ctx context.Context, sel ast.SelectionSet, v *model.UsersCursor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UsersCursor(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋgraphᚋmodelᚐVote(ctx context.Context, sel ast.SelectionSet, v *model.Vote) graphql.Marshaler {

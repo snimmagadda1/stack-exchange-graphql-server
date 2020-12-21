@@ -11,12 +11,6 @@
 
 #### [🚀 CURRENT SCHEMA HERE 🚀](./graph/schema.graphqls)
 
-## Compile
-
-```sh
-go build server.go
-```
-
 ## Usage
 
 The server is available as a docker container:
@@ -43,6 +37,16 @@ Some environment variables must be set to run locally
 
 TODO: configurable params...
 
+## Compile
+
+```sh
+go build server.go
+```
+
+## Development
+
+TODO
+
 ## Run tests
 
 ```sh
@@ -60,7 +64,7 @@ TODO
 
 ### Current data pipeline
 
-I'm probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into a relational backend using a custom job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this gets some traction, availability will be increased.
+I'm probably going to do some refinement and swap to something like an Elastic backend but for now here's the early setup. XML dumps published by Stack Exchange are imported into an indexed relational backend using a job written with [Spring Batch](https://github.com/spring-projects/spring-batch) on a schedule. The graphql server reads from this backend to expose Stack Exchange data. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this gets some traction, availability will be increased.
 
 ![Diagram of current processing pipeline](pipeline_current.png)
 

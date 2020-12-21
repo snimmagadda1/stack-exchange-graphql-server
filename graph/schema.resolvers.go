@@ -61,7 +61,7 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
 	}
-	// field to sort by
+	// prep query - field to sort by - not currently implemented
 	field := "Id"
 	var order *model.PostsOrderBy
 	if where != nil {
@@ -79,7 +79,7 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 		logrus.Infof("Using field %s with order type %s", field, order.Field)
 	}
 
-	// query start
+	// prep query - query start
 	start := int64(0)
 	if after != nil {
 		decoded, err := base64.StdEncoding.DecodeString(*after)
@@ -92,9 +92,7 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 		}
 	}
 
-	var total int64
-	r.DB.Model(&model.Post{}).Count(&total)
-	logrus.Infof("Total count of posts in db found %d", total)
+	// prep query  - limit
 	limit := 10
 	if first != nil {
 		limit = *first
@@ -103,6 +101,12 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 		logrus.Warn("Limit requested exceeds maximum 100")
 		limit = 100
 	}
+
+	// result metadata
+	var total int64
+	r.DB.Model(&model.Post{}).Count(&total)
+	logrus.Infof("Total count of posts in db found %d", total)
+
 	// select * from posts where id = after order by id DESC limit first
 	posts := []model.Post{}
 	r.DB.Where(field+" > ?", start).Limit(limit).Find(&posts).Order(field + " desc")

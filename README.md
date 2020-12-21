@@ -1,6 +1,8 @@
 # Welcome to stack-exchange-graphql-server
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000)
+[![Build Status](https://travis-ci.com/snimmagadda1/stack-exchange-graphql-server.svg?branch=master)](https://travis-ci.com/snimmagadda1/stack-exchange-graphql-server)
+[![Go Report](https://goreportcard.com/badge/github.com/snimmagadda1/stack-exchange-graphql-server)](https://goreportcard.com/report/github.com/snimmagadda1/stack-exchange-graphql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 > A GraphQL implementation to expose stack overflow resources (Comments, Posts, Answers, Votes, etc)

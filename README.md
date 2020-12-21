@@ -30,7 +30,7 @@ docker run -e SERVER='<dbhost>' -e UNAME='<dbUname>' -e PASS='<dbPass>' snimmaga
 or to run from source:
 
 ```sh
-go run server.go
+go run cmd/server.go
 ```
 
 Some environment variables must be set to run locally

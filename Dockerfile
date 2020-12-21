@@ -4,7 +4,7 @@ EXPOSE 8080
 ENV SERVER test
 ENV UNAME testu
 ENV PASS testpass
-ENV SERVER stacke
+ENV SCHEMA stacke
 ## We create an /app directory within our
 ## image that will hold our application source
 ## files

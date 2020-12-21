@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-> GraphQL implementation to expose stack overflow resources (Comments, Posts, Answers, Votes, etc)
+> A GraphQL implementation to expose stack overflow resources (Comments, Posts, Answers, Votes, etc)
 
 ### 🏠 [Try out the live API](https://stack-exchange-graphql-server.azurewebsites.net/)
 

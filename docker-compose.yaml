@@ -5,7 +5,6 @@ services:
         image: mysql:5.7.26
         command: --default-authentication-plugin=mysql_native_password
         restart: always
-        network_mode: host
         environment:
             MYSQL_ROOT_PASSWORD: password
             MYSQL_DATABASE: stacke
@@ -15,14 +14,16 @@ services:
         volumes:
             - ./dev/init:/docker-entrypoint-initdb.d
 
-    # server:
-    #     image: snimmagadda/stack-exchange-graphql-server:latest
-    #     network_mode: host
-    #     environment:
-    #         MYSQL_ROOT_PASSWORD: password
-    #         MYSQL_DATABASE: stacke
-    #         MYSQL_USER: user
-    #         MYSQL_PASSWORD: password
+    server:
+        image: snimmagadda/stack-exchange-graphql-server:latest
+        restart: always
+        depends_on:
+            - db
+        environment:
+            USER: user
+            PASS: password
+            SCHEMA: stacke
+            SERVER: db
 
     adminer:
         image: adminer

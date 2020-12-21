@@ -128,7 +128,7 @@ I'm probably going to do some refinement and swap to something like an Elastic b
 
 👤 **Sai Nimmagadda**
 
--   Website: s11a.com
+-   Website: [s11a.com](s11a.com)
 -   Github: [@snimmagadda1](https://github.com/snimmagadda1)
 
 ## 🤝 Contributing

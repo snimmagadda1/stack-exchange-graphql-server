@@ -49,7 +49,7 @@ TODO: configurable params...
 ## Compile
 
 ```sh
-go build server.go
+go build cmd/server.go
 ```
 
 ## Development
@@ -66,7 +66,7 @@ Options for development are readily flexible with more streamlined routes to com
 4. Start the server:
 
 ```
-go run server.go
+go run cmd/server.go
 ```
 
 ## Run tests

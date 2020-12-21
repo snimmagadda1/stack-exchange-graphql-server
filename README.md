@@ -19,7 +19,39 @@ To run locally:
 docker-compose up
 ```
 
-and visit [http://localhost:8080](http://localhost:8080) to start using the playground or hit the endpoint with some queries!
+and visit [http://localhost:8080](http://localhost:8080) to start using the playground or hit the endpoint with some queries! For example, to get information on a couple typical Q&A pages:
+
+```
+query posts {
+  allPostsCursor(first: 2) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      cursor
+      node {
+        score
+        title
+        body
+        comments {
+          userId
+          text
+        }
+        answers {
+          score
+          body
+          comments {
+            userDisplayName
+            text
+          }
+        }
+      }
+    }
+  }
+}
+
+```
 
 The server is also available as a docker container provided a separate backend exists:
 

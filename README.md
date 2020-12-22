@@ -5,13 +5,13 @@
 [![Go Report](https://goreportcard.com/badge/github.com/snimmagadda1/stack-exchange-graphql-server)](https://goreportcard.com/report/github.com/snimmagadda1/stack-exchange-graphql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-> A GraphQL implementation to expose stack overflow resources (Comments, Posts, Answers, Votes, etc)
+> A GraphQL implementation to expose stack overflow resources efficiently (Comments, Posts, Answers, Votes, etc)
 
 ### 🏠 [Try out the live API](https://stack-exchange-graphql-server.azurewebsites.net/)
 
-[Stack Exchange](https://api.stackexchange.com/docs?tab=category#docs) doesn't have a GraphQL endpoint so I made one. For now, the live API above is in POC mode only as the schema is built. It is currently serving content from [https://anime.stackexchange.com/](https://anime.stackexchange.com/) and is updated weekly with more to come as the [pipeline & infra](https://github.com/snimmagadda1/stackexchange-dump-to-mysql) are beefed up & built out.
+[Stack Exchange](https://api.stackexchange.com/docs?tab=category#docs) doesn't have a GraphQL endpoint so I made one. The live API above is in POC mode for now as the schema is built. It is currently serving content from [https://anime.stackexchange.com/](https://anime.stackexchange.com/) and is updated weekly with more to come as the [pipeline & infra](https://github.com/snimmagadda1/stackexchange-dump-to-mysql) are beefed up & built out.
 
-#### [🚀 CURRENT SCHEMA HERE 🚀](./graph/schema.graphqls)
+#### [🚀 CURRENT SCHEMA HERE 🚀](./schema/schema.graphqls)
 
 ## Usage
 
@@ -21,12 +21,12 @@ To run locally:
 docker-compose up
 ```
 
-and visit [http://localhost:8080](http://localhost:8080) to start using the playground or hit the endpoint with some queries! For example, to get information on a couple typical Q&A pages:
+and visit [http://localhost:8080](http://localhost:8080) to start using the playground or hit the endpoint with some queries! For example, to get information on a the highest scoring Q&A pages in a sub-community:
 
 ```
-query posts {
-  allPostsCursor(first: 2) {
-    pageInfo {
+query postsPagination {
+  allPostsCursor(first: 10, where: { order: { field: votes, order: DESC } }) {
+   pageInfo {
       hasNextPage
       hasPreviousPage
     }

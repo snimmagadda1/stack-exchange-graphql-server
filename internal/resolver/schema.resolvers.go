@@ -11,7 +11,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/snimmagadda1/graphql-api/generated"
-	"github.com/snimmagadda1/graphql-api/internal/util"
 	"github.com/snimmagadda1/graphql-api/model"
 )
 
@@ -63,21 +62,6 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	}
 	// prep query - field to sort by - not currently implemented
 	field := "Id"
-	var order *model.PostsOrderBy
-	if where != nil {
-		order = where.Order
-		switch key := *order.Field; key {
-		case model.PostsSortFieldsActivity:
-			field = "LastActivityDate"
-		case model.PostsSortFieldsCreation:
-			field = "CreationDate"
-		case model.PostsSortFieldsVotes:
-			field = "Score"
-		default:
-			field = "Id"
-		}
-		logrus.Infof("Using field %s with order type %s", field, order.Field)
-	}
 
 	// prep query - query start
 	start := int64(0)
@@ -109,26 +93,74 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 
 	// select * from posts where id = after order by id DESC limit first
 	posts := []model.Post{}
-	r.DB.Where(field+" > ?", start).Limit(limit).Find(&posts).Order(field + " desc")
+	if where == nil || where.Order.Field == nil {
+		r.DB.Where(field+" > ?", start).Limit(limit).Order(field + " desc").Find(&posts)
 
-	// create edges from results
-	postEdges := []*model.PostEdge{}
-	for i := range posts {
-		cursor := util.GetCursor(posts[i], field)
-		toAdd := &model.PostEdge{Cursor: cursor, Node: &posts[i]}
-		postEdges = append(postEdges, toAdd)
+		// create edges from results
+		postEdges := model.GetPostEdges(posts)
+
+		// should limt = first here...?
+		pageInfo := model.PageInfo{
+			HasNextPage:     start+int64(limit) < total,
+			HasPreviousPage: start > 0,
+		}
+
+		return &model.PostsCursor{
+			Edges:    postEdges,
+			PageInfo: &pageInfo,
+		}, nil
 	}
 
-	// should limt = first here...?
-	pageInfo := model.PageInfo{
-		HasNextPage:     start+int64(limit) < total,
-		HasPreviousPage: start > 0,
+	// Case client order... back too our roots SQL
+	sortInfo := where.Order
+	order := "desc"
+	if sortInfo.Order != nil {
+		order = string(*sortInfo.Order)
 	}
 
-	return &model.PostsCursor{
-		Edges:    postEdges,
-		PageInfo: &pageInfo,
-	}, nil
+	switch key := *sortInfo.Field; key {
+	case model.PostsSortFieldsActivity:
+		field = "LastActivityDate"
+	case model.PostsSortFieldsCreation:
+		field = "CreationDate"
+	case model.PostsSortFieldsVotes:
+		field = "Score"
+	default:
+		field = "Id"
+	}
+
+	if after != nil {
+		endSQL := ""
+		r.DB.Raw("SELECT "+field+" FROM posts swhere id = ?", start).Scan(&endSQL)
+		res := []model.Post{}
+		r.DB.Limit(limit).Where(field+" <= ?", endSQL).Where("id != ? ", start).Order(field + " " + order).Order("id desc").Find(&res)
+
+		postEdges := model.GetPostEdges(res)
+		pageInfo := model.PageInfo{
+			HasNextPage:     start+int64(limit) < total,
+			HasPreviousPage: start > 0,
+		}
+
+		return &model.PostsCursor{
+			Edges:    postEdges,
+			PageInfo: &pageInfo,
+		}, nil
+
+	} else {
+		res := []model.Post{}
+		r.DB.Limit(limit).Order(field + " " + order).Order("id desc").Find(&res)
+
+		postEdges := model.GetPostEdges(res)
+		pageInfo := model.PageInfo{
+			HasNextPage:     start+int64(limit) < total,
+			HasPreviousPage: start > 0,
+		}
+
+		return &model.PostsCursor{
+			Edges:    postEdges,
+			PageInfo: &pageInfo,
+		}, nil
+	}
 }
 
 func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error) {

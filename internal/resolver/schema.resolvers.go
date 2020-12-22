@@ -97,7 +97,10 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 		r.DB.Where(field+" > ?", start).Limit(limit).Order(field + " desc").Find(&posts)
 
 		// create edges from results
-		postEdges := model.GetPostEdges(posts)
+		var postEdges []*model.PostEdge
+		for i := range posts {
+			postEdges = append(postEdges, posts[i].PostEdge())
+		}
 
 		// should limt = first here...?
 		pageInfo := model.PageInfo{
@@ -131,11 +134,14 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 
 	if after != nil {
 		endSQL := ""
-		r.DB.Raw("SELECT "+field+" FROM posts swhere id = ?", start).Scan(&endSQL)
-		res := []model.Post{}
-		r.DB.Limit(limit).Where(field+" <= ?", endSQL).Where("id != ? ", start).Order(field + " " + order).Order("id desc").Find(&res)
+		r.DB.Raw("SELECT "+field+" FROM posts where id = ?", start).Scan(&endSQL)
+		r.DB.Limit(limit).Where(field+" <= ?", endSQL).Where("id != ? ", start).Order(field + " " + order).Order("id desc").Find(&posts)
 
-		postEdges := model.GetPostEdges(res)
+		// create edges from results
+		var postEdges []*model.PostEdge
+		for i := range posts {
+			postEdges = append(postEdges, posts[i].PostEdge())
+		}
 		pageInfo := model.PageInfo{
 			HasNextPage:     start+int64(limit) < total,
 			HasPreviousPage: start > 0,
@@ -146,21 +152,25 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 			PageInfo: &pageInfo,
 		}, nil
 
-	} else {
-		res := []model.Post{}
-		r.DB.Limit(limit).Order(field + " " + order).Order("id desc").Find(&res)
-
-		postEdges := model.GetPostEdges(res)
-		pageInfo := model.PageInfo{
-			HasNextPage:     start+int64(limit) < total,
-			HasPreviousPage: start > 0,
-		}
-
-		return &model.PostsCursor{
-			Edges:    postEdges,
-			PageInfo: &pageInfo,
-		}, nil
 	}
+
+	r.DB.Limit(limit).Order(field + " " + order).Order("id desc").Find(&posts)
+
+	// create edges from results
+	var postEdges []*model.PostEdge
+	for i := range posts {
+		postEdges = append(postEdges, posts[i].PostEdge())
+	}
+	pageInfo := model.PageInfo{
+		HasNextPage:     start+int64(limit) < total,
+		HasPreviousPage: start > 0,
+	}
+
+	return &model.PostsCursor{
+		Edges:    postEdges,
+		PageInfo: &pageInfo,
+	}, nil
+
 }
 
 func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error) {

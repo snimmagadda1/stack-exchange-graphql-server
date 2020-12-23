@@ -18,6 +18,15 @@ type CommentsCursor struct {
 	PageInfo *PageInfo      `json:"pageInfo"`
 }
 
+type CommentsOrderBy struct {
+	Field *CommentSortFields `json:"field"`
+	Order *Order             `json:"order"`
+}
+
+type CommentsWhere struct {
+	Order *CommentsOrderBy `json:"order"`
+}
+
 type PageInfo struct {
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	HasNextPage     bool `json:"hasNextPage"`
@@ -59,6 +68,47 @@ type UsersOrderBy struct {
 
 type UsersWhere struct {
 	Order *UsersOrderBy `json:"order"`
+}
+
+type CommentSortFields string
+
+const (
+	CommentSortFieldsCreation CommentSortFields = "creation"
+	CommentSortFieldsVotes    CommentSortFields = "votes"
+)
+
+var AllCommentSortFields = []CommentSortFields{
+	CommentSortFieldsCreation,
+	CommentSortFieldsVotes,
+}
+
+func (e CommentSortFields) IsValid() bool {
+	switch e {
+	case CommentSortFieldsCreation, CommentSortFieldsVotes:
+		return true
+	}
+	return false
+}
+
+func (e CommentSortFields) String() string {
+	return string(e)
+}
+
+func (e *CommentSortFields) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CommentSortFields(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CommentSortFields", str)
+	}
+	return nil
+}
+
+func (e CommentSortFields) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type Order string

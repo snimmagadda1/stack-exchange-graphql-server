@@ -1,6 +1,10 @@
 extend type Query {
     getComment(id: Int!): Comment
-    allCommentsCursor(first: Int = 10, after: String): CommentsCursor
+    allCommentsCursor(
+        first: Int = 10
+        after: String
+        where: CommentsWhere
+    ): CommentsCursor
 }
 
 type Comment {
@@ -14,6 +18,11 @@ type Comment {
     contentLicense: String
 }
 
+enum CommentSortFields {
+    creation
+    votes
+}
+
 type CommentEdge {
     cursor: String!
     node: Comment!
@@ -22,4 +31,13 @@ type CommentEdge {
 type CommentsCursor {
     edges: [CommentEdge]!
     pageInfo: PageInfo
+}
+
+input CommentsOrderBy {
+    field: CommentSortFields
+    order: Order
+}
+
+input CommentsWhere {
+    order: CommentsOrderBy
 }

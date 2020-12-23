@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -20,12 +19,14 @@ func (r *queryResolver) GetComment(ctx context.Context, id int) (*model.Comment,
 	return &com, nil
 }
 
-func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error) {
+func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after *string, where *model.CommentsWhere) (*model.CommentsCursor, error) {
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
 	}
+	comments := []model.Comment{}
 	// prep query sort and bounds
-	field := "Id"
+	field := "CreationDate"
+	order := "desc"
 	start, limit, err := dal.GetQueryBounds(first, after)
 	if err != nil {
 		return nil, err
@@ -36,18 +37,50 @@ func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after
 	r.DB.Model(&model.Comment{}).Count(&total)
 	logrus.Infof("Total count of comments in db found %d", total)
 
-	comments := []model.Comment{}
-	r.DB.Where(field+" > ?", start).Limit(limit).Find(&comments).Order(field + " desc")
-
-	// create edges from results
-	edges := []*model.CommentEdge{}
-	for i := range comments {
-		cursor := base64.StdEncoding.EncodeToString([]byte(comments[i].ID))
-		toAdd := &model.CommentEdge{Cursor: cursor, Node: &comments[i]}
-		edges = append(edges, toAdd)
+	if where != nil {
+		sortInfo := where.Order
+		if sortInfo.Order != nil {
+			order = string(*sortInfo.Order)
+		}
+		switch key := *sortInfo.Field; key {
+		case model.CommentSortFieldsCreation:
+			field = "CreationDate"
+		case model.CommentSortFieldsVotes:
+			field = "Score"
+		default:
+			field = "CreationDate"
+		}
 	}
 
-	// should limt = first here...?
+	if after != nil {
+		endSQL := ""
+		r.DB.Raw("SELECT "+field+" FROM comments where id = ?", start).Scan(&endSQL)
+		r.DB.Limit(limit).Where(field+" <= ?", endSQL).Where("id != ? ", start).Order(field + " " + order).Order("id desc").Find(&comments)
+
+		// create edges from results
+		var edges []*model.CommentEdge
+		for i := range comments {
+			edges = append(edges, comments[i].CommentEdge())
+		}
+		pageInfo := model.PageInfo{
+			HasNextPage:     start+int64(limit) < total,
+			HasPreviousPage: start > 0,
+		}
+
+		return &model.CommentsCursor{
+			Edges:    edges,
+			PageInfo: &pageInfo,
+		}, nil
+
+	}
+
+	r.DB.Limit(limit).Order(field + " " + order).Order("id desc").Find(&comments)
+
+	// create edges from results
+	var edges []*model.CommentEdge
+	for i := range comments {
+		edges = append(edges, comments[i].CommentEdge())
+	}
 	pageInfo := model.PageInfo{
 		HasNextPage:     start+int64(limit) < total,
 		HasPreviousPage: start > 0,

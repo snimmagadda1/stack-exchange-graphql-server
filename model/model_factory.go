@@ -13,3 +13,9 @@ func (u *User) UserEdge() *UserEdge {
 	cursor := base64.StdEncoding.EncodeToString([]byte(u.ID))
 	return &UserEdge{Cursor: cursor, Node: u}
 }
+
+// CommentEdge creates an Edge for the comment
+func (c *Comment) CommentEdge() *CommentEdge {
+	cursor := base64.StdEncoding.EncodeToString([]byte(c.ID))
+	return &CommentEdge{Cursor: cursor, Node: c}
+}

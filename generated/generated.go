@@ -128,7 +128,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AllCommentsCursor func(childComplexity int, first *int, after *string) int
+		AllCommentsCursor func(childComplexity int, first *int, after *string, where *model.CommentsWhere) int
 		AllPostsCursor    func(childComplexity int, first *int, after *string, where *model.PostsWhere) int
 		AllUsersCursor    func(childComplexity int, first *int, after *string, where *model.UsersWhere) int
 		GetBadge          func(childComplexity int, id int) int
@@ -188,7 +188,7 @@ type QueryResolver interface {
 	GetBadge(ctx context.Context, id int) (*model.Badge, error)
 	GetVote(ctx context.Context, id int) (*model.Vote, error)
 	GetComment(ctx context.Context, id int) (*model.Comment, error)
-	AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error)
+	AllCommentsCursor(ctx context.Context, first *int, after *string, where *model.CommentsWhere) (*model.CommentsCursor, error)
 	GetPost(ctx context.Context, id int) (*model.Post, error)
 	AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error)
 	GetUser(ctx context.Context, id int) (*model.User, error)
@@ -612,7 +612,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.AllCommentsCursor(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Query.AllCommentsCursor(childComplexity, args["first"].(*int), args["after"].(*string), args["where"].(*model.CommentsWhere)), true
 
 	case "Query.allPostsCursor":
 		if e.complexity.Query.AllPostsCursor == nil {
@@ -944,7 +944,11 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "schema/comment.graphqls", Input: `extend type Query {
     getComment(id: Int!): Comment
-    allCommentsCursor(first: Int = 10, after: String): CommentsCursor
+    allCommentsCursor(
+        first: Int = 10
+        after: String
+        where: CommentsWhere
+    ): CommentsCursor
 }
 
 type Comment {
@@ -958,6 +962,11 @@ type Comment {
     contentLicense: String
 }
 
+enum CommentSortFields {
+    creation
+    votes
+}
+
 type CommentEdge {
     cursor: String!
     node: Comment!
@@ -966,6 +975,15 @@ type CommentEdge {
 type CommentsCursor {
     edges: [CommentEdge]!
     pageInfo: PageInfo
+}
+
+input CommentsOrderBy {
+    field: CommentSortFields
+    order: Order
+}
+
+input CommentsWhere {
+    order: CommentsOrderBy
 }
 `, BuiltIn: false},
 	{Name: "schema/post.graphqls", Input: `extend type Query {
@@ -1176,6 +1194,15 @@ func (ec *executionContext) field_Query_allCommentsCursor_args(ctx context.Conte
 		}
 	}
 	args["after"] = arg1
+	var arg2 *model.CommentsWhere
+	if tmp, ok := rawArgs["where"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+		arg2, err = ec.unmarshalOCommentsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsWhere(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["where"] = arg2
 	return args, nil
 }
 
@@ -3385,7 +3412,7 @@ func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().AllCommentsCursor(rctx, args["first"].(*int), args["after"].(*string))
+		return ec.resolvers.Query().AllCommentsCursor(rctx, args["first"].(*int), args["after"].(*string), args["where"].(*model.CommentsWhere))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5560,6 +5587,54 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCommentsOrderBy(ctx context.Context, obj interface{}) (model.CommentsOrderBy, error) {
+	var it model.CommentsOrderBy
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalOCommentSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentSortFields(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐOrder(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCommentsWhere(ctx context.Context, obj interface{}) (model.CommentsWhere, error) {
+	var it model.CommentsWhere
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalOCommentsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsOrderBy(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPostsOrderBy(ctx context.Context, obj interface{}) (model.PostsOrderBy, error) {
 	var it model.PostsOrderBy
 	var asMap = obj.(map[string]interface{})
@@ -7112,11 +7187,43 @@ func (ec *executionContext) marshalOCommentEdge2ᚖgithubᚗcomᚋsnimmagadda1�
 	return ec._CommentEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOCommentSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentSortFields(ctx context.Context, v interface{}) (*model.CommentSortFields, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.CommentSortFields)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCommentSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentSortFields(ctx context.Context, sel ast.SelectionSet, v *model.CommentSortFields) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsCursor(ctx context.Context, sel ast.SelectionSet, v *model.CommentsCursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._CommentsCursor(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOCommentsOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsOrderBy(ctx context.Context, v interface{}) (*model.CommentsOrderBy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCommentsOrderBy(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOCommentsWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsWhere(ctx context.Context, v interface{}) (*model.CommentsWhere, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCommentsWhere(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {

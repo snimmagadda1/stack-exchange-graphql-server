@@ -7,10 +7,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"github.com/snimmagadda1/graphql-api/generated"
+	"github.com/snimmagadda1/graphql-api/internal/dal"
 	"github.com/snimmagadda1/graphql-api/model"
 )
 
@@ -60,30 +60,11 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
 	}
-	// prep query - field to sort by - not currently implemented
+	// prep query sort and bounds
 	field := "Id"
-
-	// prep query - query start
-	start := int64(0)
-	if after != nil {
-		decoded, err := base64.StdEncoding.DecodeString(*after)
-		if err != nil {
-			return nil, err
-		}
-		start, err = strconv.ParseInt(string(decoded), 10, 0)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// prep query  - limit
-	limit := 10
-	if first != nil {
-		limit = *first
-	}
-	if limit > 50 {
-		logrus.Warn("Limit requested exceeds maximum 50")
-		limit = 50
+	start, limit, err := dal.GetQueryBounds(first, after)
+	if err != nil {
+		return nil, err
 	}
 
 	// result metadata
@@ -170,37 +151,17 @@ func (r *queryResolver) AllPostsCursor(ctx context.Context, first *int, after *s
 		Edges:    postEdges,
 		PageInfo: &pageInfo,
 	}, nil
-
 }
 
 func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error) {
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
 	}
-	// prep query - field to sort by - not currently implemented
+	// prep query sort and bounds
 	field := "Id"
-
-	// prep query - query start
-	start := int64(0)
-	if after != nil {
-		decoded, err := base64.StdEncoding.DecodeString(*after)
-		if err != nil {
-			return nil, err
-		}
-		start, err = strconv.ParseInt(string(decoded), 10, 0)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// prep query  - limit
-	limit := 10
-	if first != nil {
-		limit = *first
-	}
-	if limit > 100 {
-		logrus.Warn("Limit requested exceeds maximum 100")
-		limit = 100
+	start, limit, err := dal.GetQueryBounds(first, after)
+	if err != nil {
+		return nil, err
 	}
 
 	// result metadata
@@ -231,34 +192,15 @@ func (r *queryResolver) AllCommentsCursor(ctx context.Context, first *int, after
 	}, nil
 }
 
-func (r *queryResolver) AllUsersCursor(ctx context.Context, first *int, after *string) (*model.UsersCursor, error) {
+func (r *queryResolver) AllUsersCursor(ctx context.Context, first *int, after *string, where *model.UsersWhere) (*model.UsersCursor, error) {
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
 	}
-	// prep query - field to sort by - not currently implemented
+	// prep query sort and bounds
 	field := "Id"
-
-	// prep query - query start
-	start := int64(0)
-	if after != nil {
-		decoded, err := base64.StdEncoding.DecodeString(*after)
-		if err != nil {
-			return nil, err
-		}
-		start, err = strconv.ParseInt(string(decoded), 10, 0)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// prep query  - limit
-	limit := 10
-	if first != nil {
-		limit = *first
-	}
-	if limit > 100 {
-		logrus.Warn("Limit requested exceeds maximum 100")
-		limit = 100
+	start, limit, err := dal.GetQueryBounds(first, after)
+	if err != nil {
+		return nil, err
 	}
 
 	// result metadata
@@ -270,11 +212,9 @@ func (r *queryResolver) AllUsersCursor(ctx context.Context, first *int, after *s
 	r.DB.Where(field+" > ?", start).Limit(limit).Find(&users).Order(field + " desc")
 
 	// create edges from results
-	edges := []*model.UserEdge{}
+	var edges []*model.UserEdge
 	for i := range users {
-		cursor := base64.StdEncoding.EncodeToString([]byte(users[i].ID))
-		toAdd := &model.UserEdge{Cursor: cursor, Node: &users[i]}
-		edges = append(edges, toAdd)
+		edges = append(edges, users[i].UserEdge())
 	}
 
 	// should limt = first here...?

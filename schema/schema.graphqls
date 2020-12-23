@@ -12,7 +12,11 @@ type Query {
         where: PostsWhere
     ): PostsCursor
     allCommentsCursor(first: Int = 10, after: String): CommentsCursor
-    allUsersCursor(first: Int = 10, after: String): UsersCursor
+    allUsersCursor(
+        first: Int = 10
+        after: String
+        where: UsersWhere
+    ): UsersCursor
 }
 
 type PageInfo {
@@ -32,6 +36,13 @@ enum PostsSortFields {
     activity
     creation
     votes
+}
+
+enum UsersSortFields {
+    repuatation
+    creation
+    name
+    modified
 }
 
 type PostHistory {

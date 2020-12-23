@@ -52,6 +52,15 @@ type UsersCursor struct {
 	PageInfo *PageInfo   `json:"pageInfo"`
 }
 
+type UsersOrderBy struct {
+	Field *UsersSortFields `json:"field"`
+	Order *Order           `json:"order"`
+}
+
+type UsersWhere struct {
+	Order *UsersOrderBy `json:"order"`
+}
+
 type Order string
 
 const (
@@ -135,5 +144,50 @@ func (e *PostsSortFields) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PostsSortFields) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UsersSortFields string
+
+const (
+	UsersSortFieldsRepuatation UsersSortFields = "repuatation"
+	UsersSortFieldsCreation    UsersSortFields = "creation"
+	UsersSortFieldsName        UsersSortFields = "name"
+	UsersSortFieldsModified    UsersSortFields = "modified"
+)
+
+var AllUsersSortFields = []UsersSortFields{
+	UsersSortFieldsRepuatation,
+	UsersSortFieldsCreation,
+	UsersSortFieldsName,
+	UsersSortFieldsModified,
+}
+
+func (e UsersSortFields) IsValid() bool {
+	switch e {
+	case UsersSortFieldsRepuatation, UsersSortFieldsCreation, UsersSortFieldsName, UsersSortFieldsModified:
+		return true
+	}
+	return false
+}
+
+func (e UsersSortFields) String() string {
+	return string(e)
+}
+
+func (e *UsersSortFields) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UsersSortFields(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UsersSortFields", str)
+	}
+	return nil
+}
+
+func (e UsersSortFields) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

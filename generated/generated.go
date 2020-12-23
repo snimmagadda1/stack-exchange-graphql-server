@@ -130,7 +130,7 @@ type ComplexityRoot struct {
 	Query struct {
 		AllCommentsCursor func(childComplexity int, first *int, after *string) int
 		AllPostsCursor    func(childComplexity int, first *int, after *string, where *model.PostsWhere) int
-		AllUsersCursor    func(childComplexity int, first *int, after *string) int
+		AllUsersCursor    func(childComplexity int, first *int, after *string, where *model.UsersWhere) int
 		GetBadge          func(childComplexity int, id int) int
 		GetComment        func(childComplexity int, id int) int
 		GetPost           func(childComplexity int, id int) int
@@ -192,7 +192,7 @@ type QueryResolver interface {
 	GetVote(ctx context.Context, id int) (*model.Vote, error)
 	AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error)
 	AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error)
-	AllUsersCursor(ctx context.Context, first *int, after *string) (*model.UsersCursor, error)
+	AllUsersCursor(ctx context.Context, first *int, after *string, where *model.UsersWhere) (*model.UsersCursor, error)
 }
 
 type executableSchema struct {
@@ -636,7 +636,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.AllUsersCursor(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Query.AllUsersCursor(childComplexity, args["first"].(*int), args["after"].(*string), args["where"].(*model.UsersWhere)), true
 
 	case "Query.getBadge":
 		if e.complexity.Query.GetBadge == nil {
@@ -1018,7 +1018,11 @@ input PostsWhere {
         where: PostsWhere
     ): PostsCursor
     allCommentsCursor(first: Int = 10, after: String): CommentsCursor
-    allUsersCursor(first: Int = 10, after: String): UsersCursor
+    allUsersCursor(
+        first: Int = 10
+        after: String
+        where: UsersWhere
+    ): UsersCursor
 }
 
 type PageInfo {
@@ -1038,6 +1042,13 @@ enum PostsSortFields {
     activity
     creation
     votes
+}
+
+enum UsersSortFields {
+    repuatation
+    creation
+    name
+    modified
 }
 
 type PostHistory {
@@ -1103,6 +1114,15 @@ type UserEdge {
 type UsersCursor {
     edges: [UserEdge]!
     pageInfo: PageInfo
+}
+
+input UsersOrderBy {
+    field: UsersSortFields
+    order: Order
+}
+
+input UsersWhere {
+    order: UsersOrderBy
 }
 `, BuiltIn: false},
 }
@@ -1205,6 +1225,15 @@ func (ec *executionContext) field_Query_allUsersCursor_args(ctx context.Context,
 		}
 	}
 	args["after"] = arg1
+	var arg2 *model.UsersWhere
+	if tmp, ok := rawArgs["where"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+		arg2, err = ec.unmarshalOUsersWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersWhere(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["where"] = arg2
 	return args, nil
 }
 
@@ -3504,7 +3533,7 @@ func (ec *executionContext) _Query_allUsersCursor(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().AllUsersCursor(rctx, args["first"].(*int), args["after"].(*string))
+		return ec.resolvers.Query().AllUsersCursor(rctx, args["first"].(*int), args["after"].(*string), args["where"].(*model.UsersWhere))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5571,6 +5600,54 @@ func (ec *executionContext) unmarshalInputPostsWhere(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUsersOrderBy(ctx context.Context, obj interface{}) (model.UsersOrderBy, error) {
+	var it model.UsersOrderBy
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalOUsersSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersSortFields(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalOOrder2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐOrder(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUsersWhere(ctx context.Context, obj interface{}) (model.UsersWhere, error) {
+	var it model.UsersWhere
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "order":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+			it.Order, err = ec.unmarshalOUsersOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersOrderBy(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -7190,6 +7267,38 @@ func (ec *executionContext) marshalOUsersCursor2ᚖgithubᚗcomᚋsnimmagadda1�
 		return graphql.Null
 	}
 	return ec._UsersCursor(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOUsersOrderBy2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersOrderBy(ctx context.Context, v interface{}) (*model.UsersOrderBy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUsersOrderBy(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUsersSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersSortFields(ctx context.Context, v interface{}) (*model.UsersSortFields, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.UsersSortFields)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUsersSortFields2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersSortFields(ctx context.Context, sel ast.SelectionSet, v *model.UsersSortFields) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOUsersWhere2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUsersWhere(ctx context.Context, v interface{}) (*model.UsersWhere, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUsersWhere(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐVote(ctx context.Context, sel ast.SelectionSet, v *model.Vote) graphql.Marshaler {

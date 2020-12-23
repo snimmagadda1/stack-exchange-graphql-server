@@ -1,3 +1,12 @@
+extend type Query {
+    getPost(id: Int!): Post
+    allPostsCursor(
+        first: Int = 10
+        after: String
+        where: PostsWhere
+    ): PostsCursor
+}
+
 type Post {
     id: ID!
     postType: Int
@@ -18,6 +27,13 @@ type Post {
     commentCount: Int
     comments: [Comment]
     contentLicense: String
+}
+
+enum PostsSortFields {
+    opaqueKey
+    activity
+    creation
+    votes
 }
 
 type PostEdge {

@@ -1,3 +1,12 @@
+extend type Query {
+    getUser(id: Int!): User
+    allUsersCursor(
+        first: Int = 10
+        after: String
+        where: UsersWhere
+    ): UsersCursor
+}
+
 type User {
     id: ID!
     reputation: String
@@ -15,6 +24,13 @@ type User {
     accountId: Int
     lastAccessedDate: Time
     profileImageUrl: String
+}
+
+enum UsersSortFields {
+    reputation
+    creation
+    name
+    # modified Note: not avail on public data
 }
 
 type UserEdge {

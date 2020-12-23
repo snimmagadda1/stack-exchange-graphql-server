@@ -1,22 +1,7 @@
 type Query {
-    getUser(id: Int!): User
-    getPost(id: Int!): Post
     getPostHistory(id: Int!): PostHistory
     getBadge(id: Int!): Badge
-    getComment(id: Int!): Comment
     getVote(id: Int!): Vote
-
-    allPostsCursor(
-        first: Int = 10
-        after: String
-        where: PostsWhere
-    ): PostsCursor
-    allCommentsCursor(first: Int = 10, after: String): CommentsCursor
-    allUsersCursor(
-        first: Int = 10
-        after: String
-        where: UsersWhere
-    ): UsersCursor
 }
 
 type PageInfo {
@@ -29,20 +14,6 @@ type PageInfo {
 enum Order {
     DESC
     ASC
-}
-
-enum PostsSortFields {
-    opaqueKey
-    activity
-    creation
-    votes
-}
-
-enum UsersSortFields {
-    reputation
-    creation
-    name
-    # modified Note: not avail on public data dumps
 }
 
 type PostHistory {

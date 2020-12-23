@@ -184,14 +184,14 @@ type PostResolver interface {
 	Comments(ctx context.Context, obj *model.Post) ([]*model.Comment, error)
 }
 type QueryResolver interface {
-	GetUser(ctx context.Context, id int) (*model.User, error)
-	GetPost(ctx context.Context, id int) (*model.Post, error)
 	GetPostHistory(ctx context.Context, id int) (*model.PostHistory, error)
 	GetBadge(ctx context.Context, id int) (*model.Badge, error)
-	GetComment(ctx context.Context, id int) (*model.Comment, error)
 	GetVote(ctx context.Context, id int) (*model.Vote, error)
-	AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error)
+	GetComment(ctx context.Context, id int) (*model.Comment, error)
 	AllCommentsCursor(ctx context.Context, first *int, after *string) (*model.CommentsCursor, error)
+	GetPost(ctx context.Context, id int) (*model.Post, error)
+	AllPostsCursor(ctx context.Context, first *int, after *string, where *model.PostsWhere) (*model.PostsCursor, error)
+	GetUser(ctx context.Context, id int) (*model.User, error)
 	AllUsersCursor(ctx context.Context, first *int, after *string, where *model.UsersWhere) (*model.UsersCursor, error)
 }
 
@@ -942,7 +942,12 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "schema/comment.graphqls", Input: `type Comment {
+	{Name: "schema/comment.graphqls", Input: `extend type Query {
+    getComment(id: Int!): Comment
+    allCommentsCursor(first: Int = 10, after: String): CommentsCursor
+}
+
+type Comment {
     id: ID!
     postId: Int
     score: Int
@@ -963,7 +968,16 @@ type CommentsCursor {
     pageInfo: PageInfo
 }
 `, BuiltIn: false},
-	{Name: "schema/post.graphqls", Input: `type Post {
+	{Name: "schema/post.graphqls", Input: `extend type Query {
+    getPost(id: Int!): Post
+    allPostsCursor(
+        first: Int = 10
+        after: String
+        where: PostsWhere
+    ): PostsCursor
+}
+
+type Post {
     id: ID!
     postType: Int
     acceptedAnswerId: Int
@@ -983,6 +997,13 @@ type CommentsCursor {
     commentCount: Int
     comments: [Comment]
     contentLicense: String
+}
+
+enum PostsSortFields {
+    opaqueKey
+    activity
+    creation
+    votes
 }
 
 type PostEdge {
@@ -1005,24 +1026,9 @@ input PostsWhere {
 }
 `, BuiltIn: false},
 	{Name: "schema/schema.graphqls", Input: `type Query {
-    getUser(id: Int!): User
-    getPost(id: Int!): Post
     getPostHistory(id: Int!): PostHistory
     getBadge(id: Int!): Badge
-    getComment(id: Int!): Comment
     getVote(id: Int!): Vote
-
-    allPostsCursor(
-        first: Int = 10
-        after: String
-        where: PostsWhere
-    ): PostsCursor
-    allCommentsCursor(first: Int = 10, after: String): CommentsCursor
-    allUsersCursor(
-        first: Int = 10
-        after: String
-        where: UsersWhere
-    ): UsersCursor
 }
 
 type PageInfo {
@@ -1035,20 +1041,6 @@ type PageInfo {
 enum Order {
     DESC
     ASC
-}
-
-enum PostsSortFields {
-    opaqueKey
-    activity
-    creation
-    votes
-}
-
-enum UsersSortFields {
-    reputation
-    creation
-    name
-    # modified Note: not avail on public data dumps
 }
 
 type PostHistory {
@@ -1087,7 +1079,16 @@ type Vote {
 
 scalar Time
 `, BuiltIn: false},
-	{Name: "schema/user.graphqls", Input: `type User {
+	{Name: "schema/user.graphqls", Input: `extend type Query {
+    getUser(id: Int!): User
+    allUsersCursor(
+        first: Int = 10
+        after: String
+        where: UsersWhere
+    ): UsersCursor
+}
+
+type User {
     id: ID!
     reputation: String
     creationDate: Time
@@ -1104,6 +1105,13 @@ scalar Time
     accountId: Int
     lastAccessedDate: Time
     profileImageUrl: String
+}
+
+enum UsersSortFields {
+    reputation
+    creation
+    name
+    # modified Note: not avail on public data
 }
 
 type UserEdge {
@@ -3196,84 +3204,6 @@ func (ec *executionContext) _PostsCursor_pageInfo(ctx context.Context, field gra
 	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getUser_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUser(rctx, args["id"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getPost_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPost(rctx, args["id"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Post)
-	fc.Result = res
-	return ec.marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_getPostHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3352,6 +3282,45 @@ func (ec *executionContext) _Query_getBadge(ctx context.Context, field graphql.C
 	return ec.marshalOBadge2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐBadge(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVote_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVote(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Vote)
+	fc.Result = res
+	return ec.marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐVote(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3391,7 +3360,7 @@ func (ec *executionContext) _Query_getComment(ctx context.Context, field graphql
 	return ec.marshalOComment2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐComment(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3408,7 +3377,7 @@ func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.Co
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getVote_args(ctx, rawArgs)
+	args, err := ec.field_Query_allCommentsCursor_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -3416,7 +3385,7 @@ func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetVote(rctx, args["id"].(int))
+		return ec.resolvers.Query().AllCommentsCursor(rctx, args["first"].(*int), args["after"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3425,9 +3394,48 @@ func (ec *executionContext) _Query_getVote(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Vote)
+	res := resTmp.(*model.CommentsCursor)
 	fc.Result = res
-	return ec.marshalOVote2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐVote(ctx, field.Selections, res)
+	return ec.marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsCursor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getPost_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPost(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Post)
+	fc.Result = res
+	return ec.marshalOPost2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3469,7 +3477,7 @@ func (ec *executionContext) _Query_allPostsCursor(ctx context.Context, field gra
 	return ec.marshalOPostsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐPostsCursor(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3486,7 +3494,7 @@ func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field 
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_allCommentsCursor_args(ctx, rawArgs)
+	args, err := ec.field_Query_getUser_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -3494,7 +3502,7 @@ func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().AllCommentsCursor(rctx, args["first"].(*int), args["after"].(*string))
+		return ec.resolvers.Query().GetUser(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3503,9 +3511,9 @@ func (ec *executionContext) _Query_allCommentsCursor(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.CommentsCursor)
+	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOCommentsCursor2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐCommentsCursor(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋsnimmagadda1ᚋgraphqlᚑapiᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allUsersCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6038,28 +6046,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getUser":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getUser(ctx, field)
-				return res
-			})
-		case "getPost":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getPost(ctx, field)
-				return res
-			})
 		case "getPostHistory":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -6082,6 +6068,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getBadge(ctx, field)
 				return res
 			})
+		case "getVote":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVote(ctx, field)
+				return res
+			})
 		case "getComment":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -6093,7 +6090,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getComment(ctx, field)
 				return res
 			})
-		case "getVote":
+		case "allCommentsCursor":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -6101,7 +6098,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getVote(ctx, field)
+				res = ec._Query_allCommentsCursor(ctx, field)
+				return res
+			})
+		case "getPost":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPost(ctx, field)
 				return res
 			})
 		case "allPostsCursor":
@@ -6115,7 +6123,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_allPostsCursor(ctx, field)
 				return res
 			})
-		case "allCommentsCursor":
+		case "getUser":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -6123,7 +6131,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_allCommentsCursor(ctx, field)
+				res = ec._Query_getUser(ctx, field)
 				return res
 			})
 		case "allUsersCursor":

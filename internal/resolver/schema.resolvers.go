@@ -264,26 +264,6 @@ func (r *queryResolver) AllUsersCursor(ctx context.Context, first *int, after *s
 		Edges:    edges,
 		PageInfo: &pageInfo,
 	}, nil
-
-	// users := []model.User{}
-	// r.DB.Where(field+" > ?", start).Limit(limit).Find(&users).Order(field + " desc")
-
-	// // create edges from results
-	// var edges []*model.UserEdge
-	// for i := range users {
-	// 	edges = append(edges, users[i].UserEdge())
-	// }
-
-	// // should limt = first here...?
-	// pageInfo := model.PageInfo{
-	// 	HasNextPage:     start+int64(limit) < total,
-	// 	HasPreviousPage: start > 0,
-	// }
-
-	// return &model.UsersCursor{
-	// 	Edges:    edges,
-	// 	PageInfo: &pageInfo,
-	// }, nil
 }
 
 // Query returns generated.QueryResolver implementation.

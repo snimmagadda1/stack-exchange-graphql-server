@@ -1045,10 +1045,10 @@ enum PostsSortFields {
 }
 
 enum UsersSortFields {
-    repuatation
+    reputation
     creation
     name
-    modified
+    # modified Note: not avail on public data dumps
 }
 
 type PostHistory {

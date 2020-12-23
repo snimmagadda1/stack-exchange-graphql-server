@@ -196,28 +196,65 @@ func (r *queryResolver) AllUsersCursor(ctx context.Context, first *int, after *s
 	if first != nil && *first < 0 {
 		logrus.Panic(fmt.Errorf("first must be positive"))
 	}
+	users := []model.User{}
 	// prep query sort and bounds
-	field := "Id"
+	field := "Reputation"
+	order := "desc"
 	start, limit, err := dal.GetQueryBounds(first, after)
 	if err != nil {
 		return nil, err
 	}
-
 	// result metadata
 	var total int64
 	r.DB.Model(&model.User{}).Count(&total)
 	logrus.Infof("Total count of users in db found %d", total)
 
-	users := []model.User{}
-	r.DB.Where(field+" > ?", start).Limit(limit).Find(&users).Order(field + " desc")
+	if where != nil {
+		sortInfo := where.Order
+		if sortInfo.Order != nil {
+			order = string(*sortInfo.Order)
+		}
+		switch key := *sortInfo.Field; key {
+		case model.UsersSortFieldsReputation:
+			field = "Reputation"
+		case model.UsersSortFieldsCreation:
+			field = "CreationDate"
+		case model.UsersSortFieldsName:
+			field = "DisplayName"
+		default:
+			field = "Score"
+		}
+	}
+
+	if after != nil {
+		endSQL := ""
+		r.DB.Raw("SELECT "+field+" FROM users where id = ?", start).Scan(&endSQL)
+		r.DB.Limit(limit).Where(field+" <= ?", endSQL).Where("id != ? ", start).Order(field + " " + order).Order("id desc").Find(&users)
+
+		// create edges from results
+		var edges []*model.UserEdge
+		for i := range users {
+			edges = append(edges, users[i].UserEdge())
+		}
+		pageInfo := model.PageInfo{
+			HasNextPage:     start+int64(limit) < total,
+			HasPreviousPage: start > 0,
+		}
+
+		return &model.UsersCursor{
+			Edges:    edges,
+			PageInfo: &pageInfo,
+		}, nil
+
+	}
+
+	r.DB.Limit(limit).Order(field + " " + order).Order("id desc").Find(&users)
 
 	// create edges from results
 	var edges []*model.UserEdge
 	for i := range users {
 		edges = append(edges, users[i].UserEdge())
 	}
-
-	// should limt = first here...?
 	pageInfo := model.PageInfo{
 		HasNextPage:     start+int64(limit) < total,
 		HasPreviousPage: start > 0,
@@ -227,6 +264,26 @@ func (r *queryResolver) AllUsersCursor(ctx context.Context, first *int, after *s
 		Edges:    edges,
 		PageInfo: &pageInfo,
 	}, nil
+
+	// users := []model.User{}
+	// r.DB.Where(field+" > ?", start).Limit(limit).Find(&users).Order(field + " desc")
+
+	// // create edges from results
+	// var edges []*model.UserEdge
+	// for i := range users {
+	// 	edges = append(edges, users[i].UserEdge())
+	// }
+
+	// // should limt = first here...?
+	// pageInfo := model.PageInfo{
+	// 	HasNextPage:     start+int64(limit) < total,
+	// 	HasPreviousPage: start > 0,
+	// }
+
+	// return &model.UsersCursor{
+	// 	Edges:    edges,
+	// 	PageInfo: &pageInfo,
+	// }, nil
 }
 
 // Query returns generated.QueryResolver implementation.

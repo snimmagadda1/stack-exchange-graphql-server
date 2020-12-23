@@ -150,22 +150,20 @@ func (e PostsSortFields) MarshalGQL(w io.Writer) {
 type UsersSortFields string
 
 const (
-	UsersSortFieldsRepuatation UsersSortFields = "repuatation"
-	UsersSortFieldsCreation    UsersSortFields = "creation"
-	UsersSortFieldsName        UsersSortFields = "name"
-	UsersSortFieldsModified    UsersSortFields = "modified"
+	UsersSortFieldsReputation UsersSortFields = "reputation"
+	UsersSortFieldsCreation   UsersSortFields = "creation"
+	UsersSortFieldsName       UsersSortFields = "name"
 )
 
 var AllUsersSortFields = []UsersSortFields{
-	UsersSortFieldsRepuatation,
+	UsersSortFieldsReputation,
 	UsersSortFieldsCreation,
 	UsersSortFieldsName,
-	UsersSortFieldsModified,
 }
 
 func (e UsersSortFields) IsValid() bool {
 	switch e {
-	case UsersSortFieldsRepuatation, UsersSortFieldsCreation, UsersSortFieldsName, UsersSortFieldsModified:
+	case UsersSortFieldsReputation, UsersSortFieldsCreation, UsersSortFieldsName:
 		return true
 	}
 	return false

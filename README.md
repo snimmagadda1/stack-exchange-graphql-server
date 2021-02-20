@@ -7,7 +7,7 @@
 
 > A GraphQL implementation to expose stack overflow resources efficiently (Comments, Posts, Answers, Votes, etc)
 
-### 🏠 [Try out the live API](https://stack-exchange-graphql-server.azurewebsites.net/)
+### 🏠 [Try out the live API](https://stacke-graphql.azurewebsites.net/)
 
 [Stack Exchange](https://api.stackexchange.com/docs?tab=category#docs) doesn't have a GraphQL endpoint so I made one. The live API above is in POC mode for now as the schema is built. It is currently serving content from [https://anime.stackexchange.com/](https://anime.stackexchange.com/) and is updated weekly with more to come as the [pipeline & infra](https://github.com/snimmagadda1/stackexchange-dump-to-mysql) are beefed up & built out. Expect a minimal amount of latency because this is currently hosted in an App Service, which will spin down during periods of low-usage. If this happens, please be patient and the playground/requests should come blazing in after the first 'wakeup'. If this gets some traction, availability will be increased.
 
